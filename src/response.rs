@@ -11,8 +11,8 @@ impl PaperClientResponse {
 		}
 	}
 
-	pub fn is_ok(&self) -> &bool {
-		&self.is_ok
+	pub fn is_ok(&self) -> bool {
+		self.is_ok
 	}
 
 	pub fn data(&self) -> &str {
