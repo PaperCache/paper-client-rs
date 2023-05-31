@@ -12,6 +12,8 @@ pub enum Command<'a> {
 	Set(&'a str, &'a str, &'a u32),
 	Del(&'a str),
 
+	Clear,
+
 	Resize(&'a u64),
 	Policy(&'a Policy),
 
@@ -50,9 +52,15 @@ impl<'a> Command<'a> {
 					.to_sheet()
 			},
 
-			Command::Resize(size) => {
+			Command::Clear => {
 				SheetBuilder::new()
 					.write_u8(&4)
+					.to_sheet()
+			},
+
+			Command::Resize(size) => {
+				SheetBuilder::new()
+					.write_u8(&5)
 					.write_u64(&size)
 					.to_sheet()
 			},
@@ -64,14 +72,14 @@ impl<'a> Command<'a> {
 				};
 
 				SheetBuilder::new()
-					.write_u8(&5)
+					.write_u8(&6)
 					.write_u8(&byte)
 					.to_sheet()
 			},
 
 			Command::Stats => {
 				SheetBuilder::new()
-					.write_u8(&6)
+					.write_u8(&7)
 					.to_sheet()
 			},
 		};

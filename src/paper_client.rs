@@ -66,6 +66,13 @@ impl PaperClient {
 		self.receive(&command).await
 	}
 
+	pub async fn clear(&self) -> Result<PaperClientResponse, PaperClientError> {
+		let command = &Command::Clear;
+
+		self.send(&command).await?;
+		self.receive(&command).await
+	}
+
 	pub async fn resize(&self, size: &u64) -> Result<PaperClientResponse, PaperClientError> {
 		let command = &Command::Resize(size);
 
