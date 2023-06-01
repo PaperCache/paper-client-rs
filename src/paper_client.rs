@@ -52,13 +52,13 @@ impl PaperClient {
 		self.receive(&command).await
 	}
 
-	pub async fn set(&self, key: &str, value: &str, ttl: Option<&u32>) -> Result<PaperClientResponse, PaperClientError> {
+	pub async fn set(&self, key: &str, value: &str, ttl: &Option<u32>) -> Result<PaperClientResponse, PaperClientError> {
 		let ttl_value = match ttl {
-			Some(ttl) => ttl,
+			Some(value) => value,
 			None => &0,
 		};
 
-		let command = &Command::Set(key, value, ttl_value);
+		let command = &Command::Set(key, value, &ttl_value);
 
 		self.send(&command).await?;
 		self.receive(&command).await
