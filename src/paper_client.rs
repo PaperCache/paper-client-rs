@@ -45,6 +45,13 @@ impl PaperClient {
 		self.receive(&command).await
 	}
 
+	pub async fn version(&self) -> Result<PaperClientResponse, PaperClientError> {
+		let command = &Command::Version;
+
+		self.send(&command).await?;
+		self.receive(&command).await
+	}
+
 	pub async fn get(&self, key: &str) -> Result<PaperClientResponse, PaperClientError> {
 		let command = &Command::Get(key);
 

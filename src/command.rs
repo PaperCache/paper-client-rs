@@ -7,6 +7,7 @@ use crate::policy::Policy;
 
 pub enum Command<'a> {
 	Ping,
+	Version,
 
 	Get(&'a str),
 	Set(&'a str, &'a str, &'a u32),
@@ -29,16 +30,22 @@ impl<'a> Command<'a> {
 					.to_sheet()
 			},
 
-			Command::Get(key) => {
+			Command::Version => {
 				SheetBuilder::new()
 					.write_u8(&1)
+					.to_sheet()
+			},
+
+			Command::Get(key) => {
+				SheetBuilder::new()
+					.write_u8(&2)
 					.write_str(&key)
 					.to_sheet()
 			},
 
 			Command::Set(key, value, ttl) => {
 				SheetBuilder::new()
-					.write_u8(&2)
+					.write_u8(&3)
 					.write_str(&key)
 					.write_str(&value)
 					.write_u32(&ttl)
@@ -47,20 +54,20 @@ impl<'a> Command<'a> {
 
 			Command::Del(key) => {
 				SheetBuilder::new()
-					.write_u8(&3)
+					.write_u8(&4)
 					.write_str(&key)
 					.to_sheet()
 			},
 
 			Command::Clear => {
 				SheetBuilder::new()
-					.write_u8(&4)
+					.write_u8(&5)
 					.to_sheet()
 			},
 
 			Command::Resize(size) => {
 				SheetBuilder::new()
-					.write_u8(&5)
+					.write_u8(&6)
 					.write_u64(&size)
 					.to_sheet()
 			},
@@ -72,14 +79,14 @@ impl<'a> Command<'a> {
 				};
 
 				SheetBuilder::new()
-					.write_u8(&6)
+					.write_u8(&7)
 					.write_u8(&byte)
 					.to_sheet()
 			},
 
 			Command::Stats => {
 				SheetBuilder::new()
-					.write_u8(&7)
+					.write_u8(&8)
 					.to_sheet()
 			},
 		};
