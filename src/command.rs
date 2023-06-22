@@ -104,6 +104,7 @@ impl<'a> Command<'a> {
 				let used_size = reader.read_u64().await?;
 				let total_gets = reader.read_u64().await?;
 				let miss_ratio = reader.read_f64().await?;
+				let policy = reader.read_string().await?;
 
 				let max_size_output = format!(
 					"max_size:\t{} ({} B)",
@@ -128,11 +129,12 @@ impl<'a> Command<'a> {
 				);
 
 				format!(
-					"paper stats\n{}\n{}\n{}\n{}",
+					"paper stats\n{}\n{}\n{}\n{}\n{}",
 					max_size_output,
 					used_size_output,
 					total_gets_output,
-					miss_ratio_output
+					miss_ratio_output,
+					policy
 				)
 			},
 
