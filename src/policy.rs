@@ -7,6 +7,13 @@ pub enum Policy {
 }
 
 impl Policy {
+	pub fn id(&self) -> String {
+		match self {
+			Policy::Lru => "lru".to_owned(),
+			Policy::Mru => "mru".to_owned(),
+		}
+	}
+
 	pub fn from_id(id: &str) -> Result<Self, PaperClientError> {
 		match id {
 			"lru" => Ok(Policy::Lru),
