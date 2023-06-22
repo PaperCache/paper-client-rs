@@ -4,6 +4,7 @@ use crate::error::{PaperClientError, ErrorKind};
 use crate::response::PaperClientResponse;
 use crate::command::Command;
 use crate::policy::Policy;
+use crate::stats::Stats;
 
 pub struct PaperClient {
 	stream: TcpStream,
@@ -183,15 +184,15 @@ impl PaperClient {
 	/// # Examples
 	/// ```
 	/// match client.stats() {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), repsonse.data()),
+	///     Ok(response) => println!("{}: {:?}", response.is_ok(), repsonse.data()),
 	///     Ok(err) => println!("{:?}", err),
 	/// }
 	/// ```
-	pub async fn stats(&self) -> Result<PaperClientResponse, PaperClientError> {
+	pub async fn stats(&self) -> Result<PaperClientResponse<Stats>, PaperClientError> {
 		let command = &Command::Stats;
 
 		self.send(&command).await?;
-		self.receive(&command).await
+		self.receive_stats(&command).await
 	}
 
 	async fn send<'a>(&self, command: &Command<'a>) -> Result<(), PaperClientError> {
@@ -213,7 +214,25 @@ impl PaperClient {
 			));
 		}
 
-		match command.parse_stream(&self.stream).await {
+		match command.parse_string_stream(&self.stream).await {
+			Ok(response) => Ok(response),
+
+			Err(_) => Err(PaperClientError::new(
+				ErrorKind::InvalidStream,
+				"Could not receive response from server."
+			)),
+		}
+	}
+
+	async fn receive_stats<'a>(&self, command: &Command<'a>) -> Result<PaperClientResponse<Stats>, PaperClientError> {
+		if let Err(_) = self.stream.readable().await {
+			return Err(PaperClientError::new(
+				ErrorKind::Disconnected,
+				"Disconnected from server."
+			));
+		}
+
+		match command.parse_stats_stream(&self.stream).await {
 			Ok(response) => Ok(response),
 
 			Err(_) => Err(PaperClientError::new(

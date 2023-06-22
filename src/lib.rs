@@ -10,4 +10,7 @@ pub use response::*;
 pub mod policy;
 pub use policy::*;
 
+pub mod stats;
+pub use stats::*;
+
 mod command;

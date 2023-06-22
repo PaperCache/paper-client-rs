@@ -1,9 +1,9 @@
 use tokio::net::TcpStream;
-use kwik::fmt;
 use paper_core::sheet::SheetBuilder;
-use paper_core::stream::{StreamReader, StreamError};
+use paper_core::stream::{StreamReader, StreamError, ErrorKind};
 use crate::response::PaperClientResponse;
 use crate::policy::Policy;
+use crate::stats::Stats;
 
 pub enum Command<'a> {
 	Ping,
@@ -94,55 +94,41 @@ impl<'a> Command<'a> {
 		sheet.to_stream(stream).await
 	}
 
-	pub async fn parse_stream(&self, stream: &TcpStream) -> Result<PaperClientResponse, StreamError> {
+	pub async fn parse_string_stream(&self, stream: &TcpStream) -> Result<PaperClientResponse<String>, StreamError> {
 		let reader = StreamReader::new(stream);
+
 		let is_ok = reader.read_bool().await?;
-
-		let response = match self {
-			Command::Stats => {
-				let max_size = reader.read_u64().await?;
-				let used_size = reader.read_u64().await?;
-				let total_gets = reader.read_u64().await?;
-				let miss_ratio = reader.read_f64().await?;
-				let policy = reader.read_string().await?;
-
-				let max_size_output = format!(
-					"max_size:\t{} ({} B)",
-					fmt::memory(&max_size, Some(2)),
-					max_size
-				);
-
-				let used_size_output = format!(
-					"used_size:\t{} ({} B)",
-					fmt::memory(&used_size, Some(2)),
-					used_size
-				);
-
-				let total_gets_output = format!(
-					"total_gets:\t{}",
-					fmt::number(&total_gets)
-				);
-
-				let miss_ratio_output = format!(
-					"miss_ratio:\t{:.3}",
-					miss_ratio
-				);
-
-				format!(
-					"paper stats\n{}\n{}\n{}\n{}\n{}",
-					max_size_output,
-					used_size_output,
-					total_gets_output,
-					miss_ratio_output,
-					policy
-				)
-			},
-
-			_ => {
-				reader.read_string().await?
-			},
-		};
+		let response = reader.read_string().await?;
 
 		Ok(PaperClientResponse::new(is_ok, response))
+	}
+
+	pub async fn parse_stats_stream(&self, stream: &TcpStream) -> Result<PaperClientResponse<Stats>, StreamError> {
+		let reader = StreamReader::new(stream);
+
+		let is_ok = reader.read_bool().await?;
+
+		let max_size = reader.read_u64().await?;
+		let used_size = reader.read_u64().await?;
+		let total_gets = reader.read_u64().await?;
+		let miss_ratio = reader.read_f64().await?;
+		let policy_id = reader.read_string().await?;
+
+		let Ok(policy) = Policy::from_id(&policy_id) else {
+			return Err(StreamError::new(
+				ErrorKind::InvalidData,
+				"Invalid policy ID."
+			));
+		};
+
+		let stats = Stats::new(
+			max_size,
+			used_size,
+			total_gets,
+			miss_ratio,
+			policy
+		);
+
+		Ok(PaperClientResponse::<Stats>::new(is_ok, stats))
 	}
 }

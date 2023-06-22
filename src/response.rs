@@ -1,10 +1,10 @@
-pub struct PaperClientResponse {
+pub struct PaperClientResponse<T = String> {
 	is_ok: bool,
-	data: String,
+	data: T,
 }
 
-impl PaperClientResponse {
-	pub fn new(is_ok: bool, data: String) -> PaperClientResponse {
+impl<T> PaperClientResponse<T> {
+	pub fn new(is_ok: bool, data: T) -> Self {
 		PaperClientResponse {
 			is_ok,
 			data,
@@ -15,7 +15,7 @@ impl PaperClientResponse {
 		self.is_ok
 	}
 
-	pub fn data(&self) -> &str {
+	pub fn data(&self) -> &T {
 		&self.data
 	}
 }
