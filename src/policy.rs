@@ -14,14 +14,14 @@ impl Policy {
 		}
 	}
 
-	pub fn from_id(id: &str) -> Result<Self, PaperClientError> {
-		match id {
-			"lru" => Ok(Policy::Lru),
-			"mru" => Ok(Policy::Mru),
+	pub fn from_index(index: &u8) -> Result<Self, PaperClientError> {
+		match index {
+			0 => Ok(Policy::Lru),
+			1 => Ok(Policy::Mru),
 
 			_ => Err(PaperClientError::new(
 				ErrorKind::Internal,
-				"Invalid policy ID."
+				"Invalid policy index."
 			)),
 		}
 	}

@@ -112,12 +112,12 @@ impl<'a> Command<'a> {
 		let used_size = reader.read_u64().await?;
 		let total_gets = reader.read_u64().await?;
 		let miss_ratio = reader.read_f64().await?;
-		let policy_id = reader.read_string().await?;
+		let policy_index = reader.read_u8().await?;
 
-		let Ok(policy) = Policy::from_id(&policy_id) else {
+		let Ok(policy) = Policy::from_index(&policy_index) else {
 			return Err(StreamError::new(
 				ErrorKind::InvalidData,
-				"Invalid policy ID."
+				"Invalid policy index."
 			));
 		};
 
