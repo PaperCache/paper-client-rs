@@ -131,7 +131,7 @@ impl PaperClient {
 		self.receive(&command).await
 	}
 
-	/// Clears the contents of the cache.
+	/// Wipes the contents of the cache.
 	///
 	/// # Examples
 	/// ```
@@ -140,8 +140,8 @@ impl PaperClient {
 	///     Ok(err) => println!("{:?}", err),
 	/// }
 	/// ```
-	pub async fn clear(&self) -> Result<PaperClientResponse, PaperClientError> {
-		let command = &Command::Clear;
+	pub async fn wipe(&self) -> Result<PaperClientResponse, PaperClientError> {
+		let command = &Command::Wipe;
 
 		self.send(&command).await?;
 		self.receive(&command).await

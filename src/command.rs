@@ -13,7 +13,7 @@ pub enum Command<'a> {
 	Set(&'a str, &'a str, &'a u32),
 	Del(&'a str),
 
-	Clear,
+	Wipe,
 
 	Resize(&'a u64),
 	Policy(&'a Policy),
@@ -59,7 +59,7 @@ impl<'a> Command<'a> {
 					.to_sheet()
 			},
 
-			Command::Clear => {
+			Command::Wipe => {
 				SheetBuilder::new()
 					.write_u8(&5)
 					.to_sheet()
