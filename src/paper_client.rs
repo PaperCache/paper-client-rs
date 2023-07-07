@@ -135,7 +135,7 @@ impl PaperClient {
 	///
 	/// # Examples
 	/// ```
-	/// match client.clear() {
+	/// match client.wipe() {
 	///     Ok(response) => println!("{}: {}", response.is_ok(), repsonse.data()),
 	///     Ok(err) => println!("{:?}", err),
 	/// }
