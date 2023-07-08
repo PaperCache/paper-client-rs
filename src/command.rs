@@ -77,6 +77,7 @@ impl<'a> Command<'a> {
 					Policy::Lfu => 0,
 					Policy::Lru => 1,
 					Policy::Mru => 2,
+					Policy::Fifo => 3,
 				};
 
 				SheetBuilder::new()

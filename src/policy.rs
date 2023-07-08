@@ -5,6 +5,7 @@ pub enum Policy {
 	Lfu,
 	Lru,
 	Mru,
+	Fifo,
 }
 
 impl Policy {
@@ -13,6 +14,7 @@ impl Policy {
 			Policy::Lfu => "lfu".to_owned(),
 			Policy::Lru => "lru".to_owned(),
 			Policy::Mru => "mru".to_owned(),
+			Policy::Fifo => "fifo".to_owned(),
 		}
 	}
 
@@ -21,6 +23,7 @@ impl Policy {
 			0 => Ok(Policy::Lfu),
 			1 => Ok(Policy::Lru),
 			2 => Ok(Policy::Mru),
+			3 => Ok(Policy::Fifo),
 
 			_ => Err(PaperClientError::new(
 				ErrorKind::Internal,
