@@ -4,6 +4,7 @@ use crate::error::{PaperClientError, ErrorKind};
 pub enum Policy {
 	Lru,
 	Mru,
+	Lfu,
 }
 
 impl Policy {
@@ -11,6 +12,7 @@ impl Policy {
 		match self {
 			Policy::Lru => "lru".to_owned(),
 			Policy::Mru => "mru".to_owned(),
+			Policy::Lfu => "lfu".to_owned(),
 		}
 	}
 
@@ -18,6 +20,7 @@ impl Policy {
 		match index {
 			0 => Ok(Policy::Lru),
 			1 => Ok(Policy::Mru),
+			2 => Ok(Policy::Lfu),
 
 			_ => Err(PaperClientError::new(
 				ErrorKind::Internal,
