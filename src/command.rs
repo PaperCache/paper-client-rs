@@ -112,8 +112,13 @@ impl<'a> Command<'a> {
 
 		let max_size = reader.read_u64().await?;
 		let used_size = reader.read_u64().await?;
+
 		let total_gets = reader.read_u64().await?;
+		let total_sets = reader.read_u64().await?;
+		let total_dels = reader.read_u64().await?;
+
 		let miss_ratio = reader.read_f64().await?;
+
 		let policy_index = reader.read_u8().await?;
 		let uptime = reader.read_u64().await?;
 
@@ -127,8 +132,13 @@ impl<'a> Command<'a> {
 		let stats = Stats::new(
 			max_size,
 			used_size,
+
 			total_gets,
+			total_sets,
+			total_dels,
+
 			miss_ratio,
+
 			policy,
 			uptime
 		);

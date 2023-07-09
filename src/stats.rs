@@ -4,8 +4,13 @@ use crate::policy::Policy;
 pub struct Stats {
 	max_size: u64,
 	used_size: u64,
+
 	total_gets: u64,
+	total_sets: u64,
+	total_dels: u64,
+
 	miss_ratio: f64,
+
 	policy: Policy,
 	uptime: u64,
 }
@@ -20,16 +25,26 @@ impl Stats {
 	pub fn new(
 		max_size: u64,
 		used_size: u64,
+
 		total_gets: u64,
+		total_sets: u64,
+		total_dels: u64,
+
 		miss_ratio: f64,
+
 		policy: Policy,
 		uptime: u64,
 	) -> Self {
 		Stats {
 			max_size,
 			used_size,
+
 			total_gets,
+			total_sets,
+			total_dels,
+
 			miss_ratio,
+
 			policy,
 			uptime,
 		}
@@ -66,6 +81,28 @@ impl Stats {
 	/// ```
 	pub fn get_total_gets(&self) -> &u64 {
 		&self.total_gets
+	}
+
+	/// Returns the cache's total number of sets.
+	///
+	/// # Examples
+	/// ```
+	/// let stats = Stats::new(0, 0, 10, 0.0, Policy::Lru, 0);
+	/// assert_eq(stats.get_total_sets(), 10);
+	/// ```
+	pub fn get_total_sets(&self) -> &u64 {
+		&self.total_sets
+	}
+
+	/// Returns the cache's total number of dels.
+	///
+	/// # Examples
+	/// ```
+	/// let stats = Stats::new(0, 0, 10, 0.0, Policy::Lru, 0);
+	/// assert_eq(stats.get_total_dels(), 10);
+	/// ```
+	pub fn get_total_dels(&self) -> &u64 {
+		&self.total_dels
 	}
 
 	/// Returns the cache's miss ratio.
