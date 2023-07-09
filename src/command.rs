@@ -75,9 +75,9 @@ impl<'a> Command<'a> {
 			Command::Policy(policy) => {
 				let byte: u8 = match policy {
 					Policy::Lfu => 0,
-					Policy::Lru => 1,
-					Policy::Mru => 2,
-					Policy::Fifo => 3,
+					Policy::Fifo => 1,
+					Policy::Lru => 2,
+					Policy::Mru => 3,
 				};
 
 				SheetBuilder::new()
