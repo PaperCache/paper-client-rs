@@ -22,6 +22,7 @@ impl Stats {
 	/// ```
 	/// let stats = Stats::new(0, 0, 0, 0.0, Policy::Lru);
 	/// ```
+	#[allow(clippy::too_many_arguments)]
 	pub fn new(
 		max_size: u64,
 		used_size: u64,

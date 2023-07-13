@@ -1,5 +1,5 @@
-use tokio::net::TcpStream;
-pub use paper_core::error::PaperError;
+use std::net::TcpStream;
+pub use paper_utils::error::PaperError;
 use crate::error::{PaperClientError, ErrorKind};
 use crate::response::PaperClientResponse;
 use crate::command::Command;
@@ -18,10 +18,10 @@ impl PaperClient {
 	/// ```
 	/// let client = PaperClient::new("127.0.0.1", 3145).unwrap();
 	/// ```
-	pub async fn new(host: &str, port: &u32) -> Result<Self, PaperClientError> {
+	pub fn new(host: &str, port: u32) -> Result<Self, PaperClientError> {
 		let addr = format!("{}:{}", host, port);
 
-		let stream = match TcpStream::connect(addr).await {
+		let stream = match TcpStream::connect(addr) {
 			Ok(stream) => stream,
 
 			Err(_) => {
@@ -32,7 +32,7 @@ impl PaperClient {
 			},
 		};
 
-		if let Err(_) = stream.set_nodelay(true) {
+		if stream.set_nodelay(true).is_err() {
 			return Err(PaperClientError::new(
 				ErrorKind::Internal,
 				"An internal error occured."
@@ -55,11 +55,11 @@ impl PaperClient {
 	///     Ok(err) => println!("{:?}", err),
 	/// }
 	/// ```
-	pub async fn ping(&self) -> Result<PaperClientResponse, PaperClientError> {
+	pub fn ping(&mut self) -> Result<PaperClientResponse, PaperClientError> {
 		let command = &Command::Ping;
 
-		self.send(&command).await?;
-		self.receive(&command).await
+		self.send(command)?;
+		self.receive(command)
 	}
 
 	/// Gets the cache version.
@@ -71,11 +71,11 @@ impl PaperClient {
 	///     Ok(err) => println!("{:?}", err),
 	/// }
 	/// ```
-	pub async fn version(&self) -> Result<PaperClientResponse, PaperClientError> {
+	pub fn version(&mut self) -> Result<PaperClientResponse, PaperClientError> {
 		let command = &Command::Version;
 
-		self.send(&command).await?;
-		self.receive(&command).await
+		self.send(command)?;
+		self.receive(command)
 	}
 
 	/// Gets the value of the supplied key from the cache.
@@ -87,11 +87,11 @@ impl PaperClient {
 	///     Ok(err) => println!("{:?}", err),
 	/// }
 	/// ```
-	pub async fn get(&self, key: &str) -> Result<PaperClientResponse, PaperClientError> {
+	pub fn get(&mut self, key: &str) -> Result<PaperClientResponse, PaperClientError> {
 		let command = &Command::Get(key);
 
-		self.send(&command).await?;
-		self.receive(&command).await
+		self.send(command)?;
+		self.receive(command)
 	}
 
 	/// Sets the supplied key, value, and ttl to the cache.
@@ -103,16 +103,11 @@ impl PaperClient {
 	///     Ok(err) => println!("{:?}", err),
 	/// }
 	/// ```
-	pub async fn set(&self, key: &str, value: &str, ttl: &Option<u32>) -> Result<PaperClientResponse, PaperClientError> {
-		let ttl_value = match ttl {
-			Some(value) => value,
-			None => &0,
-		};
+	pub fn set(&mut self, key: &str, value: &str, ttl: Option<u32>) -> Result<PaperClientResponse, PaperClientError> {
+		let command = &Command::Set(key, value, ttl.unwrap_or(0));
 
-		let command = &Command::Set(key, value, &ttl_value);
-
-		self.send(&command).await?;
-		self.receive(&command).await
+		self.send(command)?;
+		self.receive(command)
 	}
 
 	/// Deletes the value of the supplied key from the cache.
@@ -124,11 +119,11 @@ impl PaperClient {
 	///     Ok(err) => println!("{:?}", err),
 	/// }
 	/// ```
-	pub async fn del(&self, key: &str) -> Result<PaperClientResponse, PaperClientError> {
+	pub fn del(&mut self, key: &str) -> Result<PaperClientResponse, PaperClientError> {
 		let command = &Command::Del(key);
 
-		self.send(&command).await?;
-		self.receive(&command).await
+		self.send(command)?;
+		self.receive(command)
 	}
 
 	/// Wipes the contents of the cache.
@@ -140,11 +135,11 @@ impl PaperClient {
 	///     Ok(err) => println!("{:?}", err),
 	/// }
 	/// ```
-	pub async fn wipe(&self) -> Result<PaperClientResponse, PaperClientError> {
+	pub fn wipe(&mut self) -> Result<PaperClientResponse, PaperClientError> {
 		let command = &Command::Wipe;
 
-		self.send(&command).await?;
-		self.receive(&command).await
+		self.send(command)?;
+		self.receive(command)
 	}
 
 	/// Resizes the cache to the supplied size.
@@ -156,11 +151,11 @@ impl PaperClient {
 	///     Ok(err) => println!("{:?}", err),
 	/// }
 	/// ```
-	pub async fn resize(&self, size: &u64) -> Result<PaperClientResponse, PaperClientError> {
+	pub fn resize(&mut self, size: u64) -> Result<PaperClientResponse, PaperClientError> {
 		let command = &Command::Resize(size);
 
-		self.send(&command).await?;
-		self.receive(&command).await
+		self.send(command)?;
+		self.receive(command)
 	}
 
 	/// Sets the cache's eviction policy.
@@ -172,11 +167,11 @@ impl PaperClient {
 	///     Ok(err) => println!("{:?}", err),
 	/// }
 	/// ```
-	pub async fn policy(&self, policy: &Policy) -> Result<PaperClientResponse, PaperClientError> {
+	pub fn policy(&mut self, policy: Policy) -> Result<PaperClientResponse, PaperClientError> {
 		let command = &Command::Policy(policy);
 
-		self.send(&command).await?;
-		self.receive(&command).await
+		self.send(command)?;
+		self.receive(command)
 	}
 
 	/// Gets the cache statistics.
@@ -188,57 +183,37 @@ impl PaperClient {
 	///     Ok(err) => println!("{:?}", err),
 	/// }
 	/// ```
-	pub async fn stats(&self) -> Result<PaperClientResponse<Stats>, PaperClientError> {
+	pub fn stats(&mut self) -> Result<PaperClientResponse<Stats>, PaperClientError> {
 		let command = &Command::Stats;
 
-		self.send(&command).await?;
-		self.receive_stats(&command).await
+		self.send(command)?;
+		self.receive_stats(command)
 	}
 
-	async fn send<'a>(&self, command: &Command<'a>) -> Result<(), PaperClientError> {
-		if let Err(_) = command.to_stream(&self.stream).await {
-			return Err(PaperClientError::new(
+	fn send(&mut self, command: &Command<'_>) -> Result<(), PaperClientError> {
+		command.to_stream(&mut self.stream).map_err(|_| {
+			PaperClientError::new(
 				ErrorKind::InvalidStream,
 				"Could not send command to server."
-			));
-		}
-
-		Ok(())
+			)
+		})
 	}
 
-	async fn receive<'a>(&self, command: &Command<'a>) -> Result<PaperClientResponse, PaperClientError> {
-		if let Err(_) = self.stream.readable().await {
-			return Err(PaperClientError::new(
-				ErrorKind::Disconnected,
-				"Disconnected from server."
-			));
-		}
-
-		match command.parse_string_stream(&self.stream).await {
-			Ok(response) => Ok(response),
-
-			Err(_) => Err(PaperClientError::new(
+	fn receive(&mut self, command: &Command<'_>) -> Result<PaperClientResponse, PaperClientError> {
+		command.parse_string_stream(&mut self.stream).map_err(|_| {
+			PaperClientError::new(
 				ErrorKind::InvalidStream,
 				"Could not receive response from server."
-			)),
-		}
+			)
+		})
 	}
 
-	async fn receive_stats<'a>(&self, command: &Command<'a>) -> Result<PaperClientResponse<Stats>, PaperClientError> {
-		if let Err(_) = self.stream.readable().await {
-			return Err(PaperClientError::new(
-				ErrorKind::Disconnected,
-				"Disconnected from server."
-			));
-		}
-
-		match command.parse_stats_stream(&self.stream).await {
-			Ok(response) => Ok(response),
-
-			Err(_) => Err(PaperClientError::new(
+	fn receive_stats(&mut self, command: &Command<'_>) -> Result<PaperClientResponse<Stats>, PaperClientError> {
+		command.parse_stats_stream(&mut self.stream).map_err(|_| {
+			PaperClientError::new(
 				ErrorKind::InvalidStream,
 				"Could not receive response from server."
-			)),
-		}
+			)
+		})
 	}
 }
