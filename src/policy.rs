@@ -18,7 +18,7 @@ impl Policy {
 		}
 	}
 
-	pub fn from_index(index: &u8) -> Result<Self, PaperClientError> {
+	pub fn from_index(index: u8) -> Result<Self, PaperClientError> {
 		match index {
 			0 => Ok(Policy::Lfu),
 			1 => Ok(Policy::Fifo),

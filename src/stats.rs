@@ -58,8 +58,8 @@ impl Stats {
 	/// let stats = Stats::new(1000, 0, 0, 0.0, Policy::Lru, 0);
 	/// assert_eq(stats.get_max_size(), 1000);
 	/// ```
-	pub fn get_max_size(&self) -> &u64 {
-		&self.max_size
+	pub fn get_max_size(&self) -> u64 {
+		self.max_size
 	}
 
 	/// Returns the cache's used size in bytes.
@@ -69,8 +69,8 @@ impl Stats {
 	/// let stats = Stats::new(1000, 500, 0, 0.0, Policy::Lru, 0);
 	/// assert_eq(stats.get_used_size(), 500);
 	/// ```
-	pub fn get_used_size(&self) -> &u64 {
-		&self.used_size
+	pub fn get_used_size(&self) -> u64 {
+		self.used_size
 	}
 
 	/// Returns the cache's total number of gets.
@@ -80,8 +80,8 @@ impl Stats {
 	/// let stats = Stats::new(0, 0, 10, 0.0, Policy::Lru, 0);
 	/// assert_eq(stats.get_total_gets(), 10);
 	/// ```
-	pub fn get_total_gets(&self) -> &u64 {
-		&self.total_gets
+	pub fn get_total_gets(&self) -> u64 {
+		self.total_gets
 	}
 
 	/// Returns the cache's total number of sets.
@@ -91,8 +91,8 @@ impl Stats {
 	/// let stats = Stats::new(0, 0, 10, 0.0, Policy::Lru, 0);
 	/// assert_eq(stats.get_total_sets(), 10);
 	/// ```
-	pub fn get_total_sets(&self) -> &u64 {
-		&self.total_sets
+	pub fn get_total_sets(&self) -> u64 {
+		self.total_sets
 	}
 
 	/// Returns the cache's total number of dels.
@@ -102,8 +102,8 @@ impl Stats {
 	/// let stats = Stats::new(0, 0, 10, 0.0, Policy::Lru, 0);
 	/// assert_eq(stats.get_total_dels(), 10);
 	/// ```
-	pub fn get_total_dels(&self) -> &u64 {
-		&self.total_dels
+	pub fn get_total_dels(&self) -> u64 {
+		self.total_dels
 	}
 
 	/// Returns the cache's miss ratio.
@@ -113,8 +113,8 @@ impl Stats {
 	/// let stats = Stats::new(0, 0, 0, 1.0, Policy::Lru, 0);
 	/// assert_eq(stats.get_miss_ratio(), 1.0);
 	/// ```
-	pub fn get_miss_ratio(&self) -> &f64 {
-		&self.miss_ratio
+	pub fn get_miss_ratio(&self) -> f64 {
+		self.miss_ratio
 	}
 
 	/// Returns the cache's eviction policy.
@@ -135,7 +135,7 @@ impl Stats {
 	/// let stats = Stats::new(0, 0, 0, 0.0, Policy::Lru, 1);
 	/// assert_eq(stats.get_uptime(), 1);
 	/// ```
-	pub fn get_uptime(&self) -> &u64 {
-		&self.uptime
+	pub fn get_uptime(&self) -> u64 {
+		self.uptime
 	}
 }

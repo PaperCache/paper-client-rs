@@ -122,7 +122,7 @@ impl<'a> Command<'a> {
 		let policy_index = reader.read_u8()?;
 		let uptime = reader.read_u64()?;
 
-		let Ok(policy) = Policy::from_index(&policy_index) else {
+		let Ok(policy) = Policy::from_index(policy_index) else {
 			return Err(StreamError::new(
 				ErrorKind::InvalidData,
 				"Invalid policy index."
