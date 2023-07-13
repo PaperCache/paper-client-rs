@@ -1,6 +1,6 @@
 use crate::error::{PaperClientError, ErrorKind};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum Policy {
 	Lfu,
 	Fifo,
