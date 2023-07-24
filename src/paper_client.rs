@@ -2,11 +2,11 @@ use std::net::TcpStream;
 pub use paper_utils::error::PaperError;
 
 use crate::{
-    error::{PaperClientError, ErrorKind},
-    response::PaperClientResponse,
-    command::Command,
-    policy::Policy,
-    stats::Stats,
+	error::{PaperClientError, ErrorKind},
+	response::PaperClientResponse,
+	command::Command,
+	policy::Policy,
+	stats::Stats,
 };
 
 pub struct PaperClient {
