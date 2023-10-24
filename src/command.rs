@@ -14,6 +14,7 @@ pub enum Command<'a> {
 	Get(&'a str),
 	Set(&'a str, &'a str, u32),
 	Del(&'a str),
+	Peek(&'a str),
 
 	Wipe,
 
@@ -23,31 +24,33 @@ pub enum Command<'a> {
 	Stats,
 }
 
+struct CommandByte;
+
 impl<'a> Command<'a> {
 	pub fn to_stream(&self, stream: &mut TcpStream) -> Result<(), StreamError> {
 		let sheet = match self {
 			Command::Ping => {
 				SheetBuilder::new()
-					.write_u8(0)
+					.write_u8(CommandByte::PING)
 					.to_sheet()
 			},
 
 			Command::Version => {
 				SheetBuilder::new()
-					.write_u8(1)
+					.write_u8(CommandByte::VERSION)
 					.to_sheet()
 			},
 
 			Command::Get(key) => {
 				SheetBuilder::new()
-					.write_u8(2)
+					.write_u8(CommandByte::GET)
 					.write_str(key)
 					.to_sheet()
 			},
 
 			Command::Set(key, value, ttl) => {
 				SheetBuilder::new()
-					.write_u8(3)
+					.write_u8(CommandByte::SET)
 					.write_str(key)
 					.write_str(value)
 					.write_u32(*ttl)
@@ -56,20 +59,27 @@ impl<'a> Command<'a> {
 
 			Command::Del(key) => {
 				SheetBuilder::new()
-					.write_u8(4)
+					.write_u8(CommandByte::DEL)
+					.write_str(key)
+					.to_sheet()
+			},
+
+			Command::Peek(key) => {
+				SheetBuilder::new()
+					.write_u8(CommandByte::PEEK)
 					.write_str(key)
 					.to_sheet()
 			},
 
 			Command::Wipe => {
 				SheetBuilder::new()
-					.write_u8(5)
+					.write_u8(CommandByte::WIPE)
 					.to_sheet()
 			},
 
 			Command::Resize(size) => {
 				SheetBuilder::new()
-					.write_u8(6)
+					.write_u8(CommandByte::RESIZE)
 					.write_u64(*size)
 					.to_sheet()
 			},
@@ -83,14 +93,14 @@ impl<'a> Command<'a> {
 				};
 
 				SheetBuilder::new()
-					.write_u8(7)
+					.write_u8(CommandByte::POLICY)
 					.write_u8(byte)
 					.to_sheet()
 			},
 
 			Command::Stats => {
 				SheetBuilder::new()
-					.write_u8(8)
+					.write_u8(CommandByte::STATS)
 					.to_sheet()
 			},
 		};
@@ -147,4 +157,21 @@ impl<'a> Command<'a> {
 
 		Ok(PaperClientResponse::<Stats>::new(is_ok, stats))
 	}
+}
+
+impl CommandByte {
+	const PING: u8 = 0;
+	const VERSION: u8 = 1;
+
+	const GET: u8 = 2;
+	const SET: u8 = 3;
+	const DEL: u8 = 4;
+	const PEEK: u8 = 5;
+
+	const WIPE: u8 = 6;
+
+	const RESIZE: u8 = 7;
+	const POLICY: u8 = 8;
+
+	const STATS: u8 = 9;
 }

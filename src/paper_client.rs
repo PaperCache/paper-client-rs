@@ -129,6 +129,23 @@ impl PaperClient {
 		self.receive(command)
 	}
 
+	/// Gets (peeks) the value of the supplied key from the cache without altering
+	/// the eviction order of the objects.
+	///
+	/// # Examples
+	/// ```
+	/// match client.peek("key") {
+	///     Ok(response) => println!("{}: {}", response.is_ok(), repsonse.data()),
+	///     Ok(err) => println!("{:?}", err),
+	/// }
+	/// ```
+	pub fn peek(&mut self, key: &str) -> Result<PaperClientResponse, PaperClientError> {
+		let command = &Command::Peek(key);
+
+		self.send(command)?;
+		self.receive(command)
+	}
+
 	/// Wipes the contents of the cache.
 	///
 	/// # Examples
