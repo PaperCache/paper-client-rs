@@ -1,11 +1,17 @@
 use std::net::TcpStream;
 
-use paper_utils::sheet::SheetBuilder;
-use paper_utils::stream::{StreamReader, StreamError, ErrorKind};
+use paper_utils::{
+	sheet::SheetBuilder,
+	stream::{StreamReader, StreamError, ErrorKind},
+	command::CommandByte,
+	policy::PolicyByte,
+};
 
-use crate::response::PaperClientResponse;
-use crate::policy::Policy;
-use crate::stats::Stats;
+use crate::{
+	response::PaperClientResponse,
+	policy::Policy,
+	stats::Stats,
+};
 
 pub enum Command<'a> {
 	Ping,
@@ -23,8 +29,6 @@ pub enum Command<'a> {
 
 	Stats,
 }
-
-struct CommandByte;
 
 impl<'a> Command<'a> {
 	pub fn to_stream(&self, stream: &mut TcpStream) -> Result<(), StreamError> {
@@ -86,10 +90,10 @@ impl<'a> Command<'a> {
 
 			Command::Policy(policy) => {
 				let byte: u8 = match policy {
-					Policy::Lfu => 0,
-					Policy::Fifo => 1,
-					Policy::Lru => 2,
-					Policy::Mru => 3,
+					Policy::Lfu => PolicyByte::LFU,
+					Policy::Fifo => PolicyByte::FIFO,
+					Policy::Lru => PolicyByte::LFU,
+					Policy::Mru => PolicyByte::MRU,
 				};
 
 				SheetBuilder::new()
@@ -131,13 +135,13 @@ impl<'a> Command<'a> {
 
 		let miss_ratio = reader.read_f64()?;
 
-		let policy_index = reader.read_u8()?;
+		let policy_byte = reader.read_u8()?;
 		let uptime = reader.read_u64()?;
 
-		let Ok(policy) = Policy::from_index(policy_index) else {
+		let Ok(policy) = Policy::from_byte(policy_byte) else {
 			return Err(StreamError::new(
 				ErrorKind::InvalidData,
-				"Invalid policy index."
+				"Invalid policy byte."
 			));
 		};
 
@@ -157,21 +161,4 @@ impl<'a> Command<'a> {
 
 		Ok(PaperClientResponse::<Stats>::new(is_ok, stats))
 	}
-}
-
-impl CommandByte {
-	const PING: u8 = 0;
-	const VERSION: u8 = 1;
-
-	const GET: u8 = 2;
-	const SET: u8 = 3;
-	const DEL: u8 = 4;
-	const PEEK: u8 = 5;
-
-	const WIPE: u8 = 6;
-
-	const RESIZE: u8 = 7;
-	const POLICY: u8 = 8;
-
-	const STATS: u8 = 9;
 }

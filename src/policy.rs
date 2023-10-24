@@ -1,3 +1,4 @@
+use paper_utils::policy::PolicyByte;
 use crate::error::{PaperClientError, ErrorKind};
 
 #[derive(Debug, Clone, Copy)]
@@ -18,16 +19,16 @@ impl Policy {
 		}
 	}
 
-	pub fn from_index(index: u8) -> Result<Self, PaperClientError> {
-		match index {
-			0 => Ok(Policy::Lfu),
-			1 => Ok(Policy::Fifo),
-			2 => Ok(Policy::Lru),
-			3 => Ok(Policy::Mru),
+	pub fn from_byte(byte: u8) -> Result<Self, PaperClientError> {
+		match byte {
+			PolicyByte::LFU => Ok(Policy::Lfu),
+			PolicyByte::FIFO => Ok(Policy::Fifo),
+			PolicyByte::LRU => Ok(Policy::Lru),
+			PolicyByte::MRU => Ok(Policy::Mru),
 
 			_ => Err(PaperClientError::new(
 				ErrorKind::Internal,
-				"Invalid policy index."
+				"Invalid policy byte."
 			)),
 		}
 	}
