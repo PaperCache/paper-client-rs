@@ -129,6 +129,23 @@ impl PaperClient {
 		self.receive(command)
 	}
 
+	/// Checks if the cache contains an object with the supplied key
+	/// without altering the eviction order of the objects.
+	///
+	/// # Examples
+	/// ```
+	/// match client.has("key") {
+	///     Ok(response) => println!("{}: {}", response.is_ok(), repsonse.data()),
+	///     Ok(err) => println!("{:?}", err),
+	/// }
+	/// ```
+	pub fn has(&mut self, key: &str) -> Result<PaperClientResponse<bool>, PaperClientError> {
+		let command = &Command::Has(key);
+
+		self.send(command)?;
+		self.receive_has(command)
+	}
+
 	/// Gets (peeks) the value of the supplied key from the cache without altering
 	/// the eviction order of the objects.
 	///
@@ -211,29 +228,30 @@ impl PaperClient {
 	}
 
 	fn send(&mut self, command: &Command<'_>) -> Result<(), PaperClientError> {
-		command.to_stream(&mut self.stream).map_err(|_| {
-			PaperClientError::new(
-				ErrorKind::InvalidStream,
-				"Could not send command to server."
-			)
-		})
+		command.to_stream(&mut self.stream).map_err(|_| PaperClientError::new(
+			ErrorKind::InvalidStream,
+			"Could not send command to server."
+		))
 	}
 
 	fn receive(&mut self, command: &Command<'_>) -> Result<PaperClientResponse, PaperClientError> {
-		command.parse_string_stream(&mut self.stream).map_err(|_| {
-			PaperClientError::new(
-				ErrorKind::InvalidStream,
-				"Could not receive response from server."
-			)
-		})
+		command.parse_string_stream(&mut self.stream).map_err(|_| PaperClientError::new(
+			ErrorKind::InvalidStream,
+			"Could not receive response from server."
+		))
+	}
+
+	fn receive_has(&mut self, command: &Command<'_>) -> Result<PaperClientResponse<bool>, PaperClientError> {
+		command.parse_has_stream(&mut self.stream).map_err(|_| PaperClientError::new(
+			ErrorKind::InvalidStream,
+			"Could not receive response from server."
+		))
 	}
 
 	fn receive_stats(&mut self, command: &Command<'_>) -> Result<PaperClientResponse<Stats>, PaperClientError> {
-		command.parse_stats_stream(&mut self.stream).map_err(|_| {
-			PaperClientError::new(
-				ErrorKind::InvalidStream,
-				"Could not receive response from server."
-			)
-		})
+		command.parse_stats_stream(&mut self.stream).map_err(|_| PaperClientError::new(
+			ErrorKind::InvalidStream,
+			"Could not receive response from server."
+		))
 	}
 }

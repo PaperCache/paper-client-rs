@@ -20,6 +20,8 @@ pub enum Command<'a> {
 	Get(&'a str),
 	Set(&'a str, &'a str, u32),
 	Del(&'a str),
+
+	Has(&'a str),
 	Peek(&'a str),
 
 	Wipe,
@@ -68,6 +70,13 @@ impl<'a> Command<'a> {
 					.to_sheet()
 			},
 
+			Command::Has(key) => {
+				SheetBuilder::new()
+					.write_u8(CommandByte::HAS)
+					.write_str(key)
+					.to_sheet()
+			},
+
 			Command::Peek(key) => {
 				SheetBuilder::new()
 					.write_u8(CommandByte::PEEK)
@@ -112,11 +121,20 @@ impl<'a> Command<'a> {
 		sheet.to_stream(stream)
 	}
 
-	pub fn parse_string_stream(&self, stream: &mut TcpStream) -> Result<PaperClientResponse<String>, StreamError> {
+	pub fn parse_string_stream(&self, stream: &mut TcpStream) -> Result<PaperClientResponse, StreamError> {
 		let mut reader = StreamReader::new(stream);
 
 		let is_ok = reader.read_bool()?;
 		let response = reader.read_string()?;
+
+		Ok(PaperClientResponse::new(is_ok, response))
+	}
+
+	pub fn parse_has_stream(&self, stream: &mut TcpStream) -> Result<PaperClientResponse<bool>, StreamError> {
+		let mut reader = StreamReader::new(stream);
+
+		let is_ok = reader.read_bool()?;
+		let response = reader.read_bool()?;
 
 		Ok(PaperClientResponse::new(is_ok, response))
 	}
