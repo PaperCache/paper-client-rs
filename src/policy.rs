@@ -1,7 +1,7 @@
 use paper_utils::policy::PolicyByte;
 use crate::error::{PaperClientError, ErrorKind};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Policy {
 	Lfu,
 	Fifo,

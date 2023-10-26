@@ -19,6 +19,8 @@ impl PaperClient {
 	///
 	/// # Examples
 	/// ```
+	/// use paper_client::PaperClient;
+	///
 	/// let client = PaperClient::new("127.0.0.1", 3145).unwrap();
 	/// ```
 	pub fn new(host: &str, port: u32) -> Result<Self, PaperClientError> {
@@ -53,80 +55,100 @@ impl PaperClient {
 	///
 	/// # Examples
 	/// ```
+	/// use paper_client::PaperClient;
+	///
+	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
+	///
 	/// match client.ping() {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), repsonse.data()),
-	///     Ok(err) => println!("{:?}", err),
+	///     Ok(response) => println!("{}: {}", response.is_ok(), response.data()),
+	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
 	pub fn ping(&mut self) -> Result<PaperClientResponse, PaperClientError> {
-		let command = &Command::Ping;
+		let command = Command::Ping;
 
-		self.send(command)?;
-		self.receive(command)
+		self.send(&command)?;
+		self.receive(&command)
 	}
 
 	/// Gets the cache version.
 	///
 	/// # Examples
 	/// ```
+	/// use paper_client::PaperClient;
+	///
+	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
+	///
 	/// match client.version() {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), repsonse.data()),
-	///     Ok(err) => println!("{:?}", err),
+	///     Ok(response) => println!("{}: {}", response.is_ok(), response.data()),
+	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
 	pub fn version(&mut self) -> Result<PaperClientResponse, PaperClientError> {
-		let command = &Command::Version;
+		let command = Command::Version;
 
-		self.send(command)?;
-		self.receive(command)
+		self.send(&command)?;
+		self.receive(&command)
 	}
 
 	/// Gets the value of the supplied key from the cache.
 	///
 	/// # Examples
 	/// ```
+	/// use paper_client::PaperClient;
+	///
+	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
+	///
 	/// match client.get("key") {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), repsonse.data()),
-	///     Ok(err) => println!("{:?}", err),
+	///     Ok(response) => println!("{}: {}", response.is_ok(), response.data()),
+	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
 	pub fn get(&mut self, key: &str) -> Result<PaperClientResponse, PaperClientError> {
-		let command = &Command::Get(key);
+		let command = Command::Get(key);
 
-		self.send(command)?;
-		self.receive(command)
+		self.send(&command)?;
+		self.receive(&command)
 	}
 
 	/// Sets the supplied key, value, and ttl to the cache.
 	///
 	/// # Examples
 	/// ```
-	/// match client.set("key", "value", 0) {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), repsonse.data()),
-	///     Ok(err) => println!("{:?}", err),
+	/// use paper_client::PaperClient;
+	///
+	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
+	///
+	/// match client.set("key", "value", None) {
+	///     Ok(response) => println!("{}: {}", response.is_ok(), response.data()),
+	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
 	pub fn set(&mut self, key: &str, value: &str, ttl: Option<u32>) -> Result<PaperClientResponse, PaperClientError> {
-		let command = &Command::Set(key, value, ttl.unwrap_or(0));
+		let command = Command::Set(key, value, ttl.unwrap_or(0));
 
-		self.send(command)?;
-		self.receive(command)
+		self.send(&command)?;
+		self.receive(&command)
 	}
 
 	/// Deletes the value of the supplied key from the cache.
 	///
 	/// # Examples
 	/// ```
+	/// use paper_client::PaperClient;
+	///
+	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
+	///
 	/// match client.del("key") {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), repsonse.data()),
-	///     Ok(err) => println!("{:?}", err),
+	///     Ok(response) => println!("{}: {}", response.is_ok(), response.data()),
+	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
 	pub fn del(&mut self, key: &str) -> Result<PaperClientResponse, PaperClientError> {
-		let command = &Command::Del(key);
+		let command = Command::Del(key);
 
-		self.send(command)?;
-		self.receive(command)
+		self.send(&command)?;
+		self.receive(&command)
 	}
 
 	/// Checks if the cache contains an object with the supplied key
@@ -134,16 +156,20 @@ impl PaperClient {
 	///
 	/// # Examples
 	/// ```
+	/// use paper_client::PaperClient;
+	///
+	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
+	///
 	/// match client.has("key") {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), repsonse.data()),
-	///     Ok(err) => println!("{:?}", err),
+	///     Ok(response) => println!("{}: {}", response.is_ok(), response.data()),
+	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
 	pub fn has(&mut self, key: &str) -> Result<PaperClientResponse<bool>, PaperClientError> {
-		let command = &Command::Has(key);
+		let command = Command::Has(key);
 
-		self.send(command)?;
-		self.receive_has(command)
+		self.send(&command)?;
+		self.receive_has(&command)
 	}
 
 	/// Gets (peeks) the value of the supplied key from the cache without altering
@@ -151,80 +177,102 @@ impl PaperClient {
 	///
 	/// # Examples
 	/// ```
+	/// use paper_client::PaperClient;
+	///
+	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
+	///
 	/// match client.peek("key") {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), repsonse.data()),
-	///     Ok(err) => println!("{:?}", err),
+	///     Ok(response) => println!("{}: {}", response.is_ok(), response.data()),
+	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
 	pub fn peek(&mut self, key: &str) -> Result<PaperClientResponse, PaperClientError> {
-		let command = &Command::Peek(key);
+		let command = Command::Peek(key);
 
-		self.send(command)?;
-		self.receive(command)
+		self.send(&command)?;
+		self.receive(&command)
 	}
 
 	/// Wipes the contents of the cache.
 	///
 	/// # Examples
 	/// ```
+	/// use paper_client::PaperClient;
+	///
+	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
+	///
 	/// match client.wipe() {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), repsonse.data()),
-	///     Ok(err) => println!("{:?}", err),
+	///     Ok(response) => println!("{}: {}", response.is_ok(), response.data()),
+	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
 	pub fn wipe(&mut self) -> Result<PaperClientResponse, PaperClientError> {
-		let command = &Command::Wipe;
+		let command = Command::Wipe;
 
-		self.send(command)?;
-		self.receive(command)
+		self.send(&command)?;
+		self.receive(&command)
 	}
 
 	/// Resizes the cache to the supplied size.
 	///
 	/// # Examples
 	/// ```
+	/// use paper_client::PaperClient;
+	///
+	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
+	///
 	/// match client.resize(10) {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), repsonse.data()),
-	///     Ok(err) => println!("{:?}", err),
+	///     Ok(response) => println!("{}: {}", response.is_ok(), response.data()),
+	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
 	pub fn resize(&mut self, size: u64) -> Result<PaperClientResponse, PaperClientError> {
-		let command = &Command::Resize(size);
+		let command = Command::Resize(size);
 
-		self.send(command)?;
-		self.receive(command)
+		self.send(&command)?;
+		self.receive(&command)
 	}
 
 	/// Sets the cache's eviction policy.
 	///
 	/// # Examples
 	/// ```
-	/// match client.policy(&Policy::Lru) {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), repsonse.data()),
-	///     Ok(err) => println!("{:?}", err),
+	/// use paper_client::{PaperClient, Policy};
+	///
+	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
+	///
+	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
+	///
+	/// match client.policy(Policy::Lru) {
+	///     Ok(response) => println!("{}: {}", response.is_ok(), response.data()),
+	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
 	pub fn policy(&mut self, policy: Policy) -> Result<PaperClientResponse, PaperClientError> {
-		let command = &Command::Policy(policy);
+		let command = Command::Policy(policy);
 
-		self.send(command)?;
-		self.receive(command)
+		self.send(&command)?;
+		self.receive(&command)
 	}
 
 	/// Gets the cache statistics.
 	///
 	/// # Examples
 	/// ```
+	/// use paper_client::PaperClient;
+	///
+	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
+	///
 	/// match client.stats() {
-	///     Ok(response) => println!("{}: {:?}", response.is_ok(), repsonse.data()),
-	///     Ok(err) => println!("{:?}", err),
+	///     Ok(response) => println!("{}: {:?}", response.is_ok(), response.data()),
+	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
 	pub fn stats(&mut self) -> Result<PaperClientResponse<Stats>, PaperClientError> {
-		let command = &Command::Stats;
+		let command = Command::Stats;
 
-		self.send(command)?;
-		self.receive_stats(command)
+		self.send(&command)?;
+		self.receive_stats(&command)
 	}
 
 	fn send(&mut self, command: &Command<'_>) -> Result<(), PaperClientError> {

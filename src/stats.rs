@@ -20,7 +20,9 @@ impl Stats {
 	///
 	/// # Examples
 	/// ```
-	/// let stats = Stats::new(0, 0, 0, 0.0, Policy::Lru);
+	/// use paper_client::{Stats, Policy};
+	///
+	/// let stats = Stats::new(0, 0, 0, 0, 0, 0.0, Policy::Lru, 0);
 	/// ```
 	#[allow(clippy::too_many_arguments)]
 	pub fn new(
@@ -55,8 +57,11 @@ impl Stats {
 	///
 	/// # Examples
 	/// ```
-	/// let stats = Stats::new(1000, 0, 0, 0.0, Policy::Lru, 0);
-	/// assert_eq(stats.get_max_size(), 1000);
+	/// use paper_client::{Stats, Policy};
+	///
+	/// let stats = Stats::new(1000, 0, 0, 0, 0, 0.0, Policy::Lru, 0);
+	///
+	/// assert_eq!(stats.get_max_size(), 1000);
 	/// ```
 	pub fn get_max_size(&self) -> u64 {
 		self.max_size
@@ -66,8 +71,11 @@ impl Stats {
 	///
 	/// # Examples
 	/// ```
-	/// let stats = Stats::new(1000, 500, 0, 0.0, Policy::Lru, 0);
-	/// assert_eq(stats.get_used_size(), 500);
+	/// use paper_client::{Stats, Policy};
+	///
+	/// let stats = Stats::new(1000, 500, 0, 0, 0, 0.0, Policy::Lru, 0);
+	///
+	/// assert_eq!(stats.get_used_size(), 500);
 	/// ```
 	pub fn get_used_size(&self) -> u64 {
 		self.used_size
@@ -77,8 +85,11 @@ impl Stats {
 	///
 	/// # Examples
 	/// ```
-	/// let stats = Stats::new(0, 0, 10, 0.0, Policy::Lru, 0);
-	/// assert_eq(stats.get_total_gets(), 10);
+	/// use paper_client::{Stats, Policy};
+	///
+	/// let stats = Stats::new(0, 0, 10, 0, 0, 0.0, Policy::Lru, 0);
+	///
+	/// assert_eq!(stats.get_total_gets(), 10);
 	/// ```
 	pub fn get_total_gets(&self) -> u64 {
 		self.total_gets
@@ -88,8 +99,11 @@ impl Stats {
 	///
 	/// # Examples
 	/// ```
-	/// let stats = Stats::new(0, 0, 10, 0.0, Policy::Lru, 0);
-	/// assert_eq(stats.get_total_sets(), 10);
+	/// use paper_client::{Stats, Policy};
+	///
+	/// let stats = Stats::new(0, 0, 0, 10, 0, 0.0, Policy::Lru, 0);
+	///
+	/// assert_eq!(stats.get_total_sets(), 10);
 	/// ```
 	pub fn get_total_sets(&self) -> u64 {
 		self.total_sets
@@ -99,8 +113,11 @@ impl Stats {
 	///
 	/// # Examples
 	/// ```
-	/// let stats = Stats::new(0, 0, 10, 0.0, Policy::Lru, 0);
-	/// assert_eq(stats.get_total_dels(), 10);
+	/// use paper_client::{Stats, Policy};
+	///
+	/// let stats = Stats::new(0, 0, 0, 0, 10, 0.0, Policy::Lru, 0);
+	///
+	/// assert_eq!(stats.get_total_dels(), 10);
 	/// ```
 	pub fn get_total_dels(&self) -> u64 {
 		self.total_dels
@@ -110,8 +127,11 @@ impl Stats {
 	///
 	/// # Examples
 	/// ```
-	/// let stats = Stats::new(0, 0, 0, 1.0, Policy::Lru, 0);
-	/// assert_eq(stats.get_miss_ratio(), 1.0);
+	/// use paper_client::{Stats, Policy};
+	///
+	/// let stats = Stats::new(0, 0, 0, 0, 0, 1.0, Policy::Lru, 0);
+	///
+	/// assert_eq!(stats.get_miss_ratio(), 1.0);
 	/// ```
 	pub fn get_miss_ratio(&self) -> f64 {
 		self.miss_ratio
@@ -121,8 +141,11 @@ impl Stats {
 	///
 	/// # Examples
 	/// ```
-	/// let stats = Stats::new(0, 0, 0, 0.0, Policy::Lru, 0);
-	/// assert_eq(stats.get_policy(), &Policy::Lru);
+	/// use paper_client::{Stats, Policy};
+	///
+	/// let stats = Stats::new(0, 0, 0, 0, 0, 0.0, Policy::Lru, 0);
+	///
+	/// assert_eq!(stats.get_policy(), &Policy::Lru);
 	/// ```
 	pub fn get_policy(&self) -> &Policy {
 		&self.policy
@@ -132,8 +155,11 @@ impl Stats {
 	///
 	/// # Examples
 	/// ```
-	/// let stats = Stats::new(0, 0, 0, 0.0, Policy::Lru, 1);
-	/// assert_eq(stats.get_uptime(), 1);
+	/// use paper_client::{Stats, Policy};
+	///
+	/// let stats = Stats::new(0, 0, 0, 0, 0, 0.0, Policy::Lru, 1);
+	///
+	/// assert_eq!(stats.get_uptime(), 1);
 	/// ```
 	pub fn get_uptime(&self) -> u64 {
 		self.uptime
