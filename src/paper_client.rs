@@ -26,15 +26,11 @@ impl PaperClient {
 	pub fn new(host: &str, port: u32) -> Result<Self, PaperClientError> {
 		let addr = format!("{}:{}", host, port);
 
-		let stream = match TcpStream::connect(addr) {
-			Ok(stream) => stream,
-
-			Err(_) => {
-				return Err(PaperClientError::new(
-					ErrorKind::InvalidAddress,
-					"Could not connect to paper server."
-				));
-			},
+		let Ok(stream) = TcpStream::connect(addr) else {
+			return Err(PaperClientError::new(
+				ErrorKind::InvalidAddress,
+				"Could not connect to paper server."
+			));
 		};
 
 		if stream.set_nodelay(true).is_err() {
@@ -44,9 +40,16 @@ impl PaperClient {
 			));
 		}
 
-		let client = PaperClient {
+		let mut client = PaperClient {
 			stream,
 		};
+
+		if client.ping().is_err() {
+			return Err(PaperClientError::new(
+				ErrorKind::Rejected,
+				"Could not connect to paper server."
+			));
+		}
 
 		Ok(client)
 	}

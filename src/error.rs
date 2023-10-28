@@ -9,6 +9,9 @@ pub use paper_utils::error::PaperError;
 pub enum ErrorKind {
 	InvalidAddress,
 	InvalidStream,
+
+	Rejected,
+
 	Disconnected,
 	Internal,
 }
