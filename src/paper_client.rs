@@ -47,7 +47,7 @@ impl PaperClient {
 		if client.ping().is_err() {
 			return Err(PaperClientError::new(
 				ErrorKind::Rejected,
-				"Could not connect to paper server."
+				"Connection was rejected by server."
 			));
 		}
 
