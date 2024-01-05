@@ -1,6 +1,3 @@
-pub mod error;
-pub use error::*;
-
 pub mod paper_client;
 pub use paper_client::*;
 

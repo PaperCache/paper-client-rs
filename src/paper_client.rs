@@ -1,8 +1,7 @@
 use std::net::TcpStream;
-pub use paper_utils::error::PaperError;
+use thiserror::Error;
 
 use crate::{
-	error::{PaperClientError, ErrorKind},
 	response::PaperClientResponse,
 	command::Command,
 	policy::Policy,
@@ -11,6 +10,24 @@ use crate::{
 
 pub struct PaperClient {
 	stream: TcpStream,
+}
+
+#[derive(Debug, Error)]
+pub enum PaperClientError {
+	#[error("Could not connect to paper server.")]
+	InvalidAddress,
+
+	#[error("Could not send command to server.")]
+	InvalidCommand,
+
+	#[error("Could not receive response from server.")]
+	InvalidResponse,
+
+	#[error("Connection was rejected by paper server.")]
+	Rejected,
+
+	#[error("An internal error occured.")]
+	Internal,
 }
 
 impl PaperClient {
@@ -27,17 +44,11 @@ impl PaperClient {
 		let addr = format!("{}:{}", host, port);
 
 		let Ok(stream) = TcpStream::connect(addr) else {
-			return Err(PaperClientError::new(
-				ErrorKind::InvalidAddress,
-				"Could not connect to paper server."
-			));
+			return Err(PaperClientError::InvalidAddress);
 		};
 
 		if stream.set_nodelay(true).is_err() {
-			return Err(PaperClientError::new(
-				ErrorKind::Internal,
-				"An internal error occured."
-			));
+			return Err(PaperClientError::Internal);
 		}
 
 		let mut client = PaperClient {
@@ -45,10 +56,7 @@ impl PaperClient {
 		};
 
 		if client.ping().is_err() {
-			return Err(PaperClientError::new(
-				ErrorKind::Rejected,
-				"Connection was rejected by paper server."
-			));
+			return Err(PaperClientError::Rejected);
 		}
 
 		Ok(client)
@@ -279,30 +287,26 @@ impl PaperClient {
 	}
 
 	fn send(&mut self, command: &Command<'_>) -> Result<(), PaperClientError> {
-		command.to_stream(&mut self.stream).map_err(|_| PaperClientError::new(
-			ErrorKind::InvalidStream,
-			"Could not send command to server."
-		))
+		command
+			.to_stream(&mut self.stream)
+			.map_err(|_| PaperClientError::InvalidCommand)
 	}
 
 	fn receive(&mut self, command: &Command<'_>) -> Result<PaperClientResponse, PaperClientError> {
-		command.parse_string_stream(&mut self.stream).map_err(|_| PaperClientError::new(
-			ErrorKind::InvalidStream,
-			"Could not receive response from server."
-		))
+		command
+			.parse_string_stream(&mut self.stream)
+			.map_err(|_| PaperClientError::InvalidResponse)
 	}
 
 	fn receive_has(&mut self, command: &Command<'_>) -> Result<PaperClientResponse<bool>, PaperClientError> {
-		command.parse_has_stream(&mut self.stream).map_err(|_| PaperClientError::new(
-			ErrorKind::InvalidStream,
-			"Could not receive response from server."
-		))
+		command
+			.parse_has_stream(&mut self.stream)
+			.map_err(|_| PaperClientError::InvalidResponse)
 	}
 
 	fn receive_stats(&mut self, command: &Command<'_>) -> Result<PaperClientResponse<Stats>, PaperClientError> {
-		command.parse_stats_stream(&mut self.stream).map_err(|_| PaperClientError::new(
-			ErrorKind::InvalidStream,
-			"Could not receive response from server."
-		))
+		command
+			.parse_stats_stream(&mut self.stream)
+			.map_err(|_| PaperClientError::InvalidResponse)
 	}
 }

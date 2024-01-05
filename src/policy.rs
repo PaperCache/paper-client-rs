@@ -1,5 +1,5 @@
 use paper_utils::policy::PolicyByte;
-use crate::error::{PaperClientError, ErrorKind};
+use crate::paper_client::PaperClientError;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Policy {
@@ -26,10 +26,7 @@ impl Policy {
 			PolicyByte::LRU => Ok(Policy::Lru),
 			PolicyByte::MRU => Ok(Policy::Mru),
 
-			_ => Err(PaperClientError::new(
-				ErrorKind::Internal,
-				"Invalid policy byte."
-			)),
+			_ => Err(PaperClientError::Internal),
 		}
 	}
 }
