@@ -2,7 +2,7 @@ use std::net::TcpStream;
 
 use paper_utils::{
 	sheet::SheetBuilder,
-	stream::{StreamReader, StreamError, ErrorKind},
+	stream::{StreamReader, StreamError},
 	command::CommandByte,
 	policy::PolicyByte,
 };
@@ -157,10 +157,7 @@ impl<'a> Command<'a> {
 		let uptime = reader.read_u64()?;
 
 		let Ok(policy) = Policy::from_byte(policy_byte) else {
-			return Err(StreamError::new(
-				ErrorKind::InvalidData,
-				"Invalid policy byte."
-			));
+			return Err(StreamError::InvalidData);
 		};
 
 		let stats = Stats::new(
