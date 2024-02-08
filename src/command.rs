@@ -101,7 +101,7 @@ impl<'a> Command<'a> {
 				let byte: u8 = match policy {
 					Policy::Lfu => PolicyByte::LFU,
 					Policy::Fifo => PolicyByte::FIFO,
-					Policy::Lru => PolicyByte::LFU,
+					Policy::Lru => PolicyByte::LRU,
 					Policy::Mru => PolicyByte::MRU,
 				};
 
