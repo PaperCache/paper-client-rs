@@ -121,11 +121,11 @@ impl<'a> Command<'a> {
 		sheet.to_stream(stream)
 	}
 
-	pub fn parse_string_stream(&self, stream: &mut TcpStream) -> Result<PaperClientResponse, StreamError> {
+	pub fn parse_buf_stream(&self, stream: &mut TcpStream) -> Result<PaperClientResponse, StreamError> {
 		let mut reader = StreamReader::new(stream);
 
 		let is_ok = reader.read_bool()?;
-		let response = reader.read_string()?;
+		let response = reader.read_buf()?;
 
 		Ok(PaperClientResponse::new(is_ok, response))
 	}

@@ -1,4 +1,6 @@
-pub struct PaperClientResponse<T = String> {
+use paper_utils::stream::Buffer;
+
+pub struct PaperClientResponse<T = Buffer> {
 	is_ok: bool,
 	data: T,
 }

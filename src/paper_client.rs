@@ -295,7 +295,7 @@ impl PaperClient {
 
 	fn receive(&mut self, command: &Command<'_>) -> Result<PaperClientResponse, PaperClientError> {
 		command
-			.parse_string_stream(&mut self.stream)
+			.parse_buf_stream(&mut self.stream)
 			.map_err(|_| PaperClientError::InvalidResponse)
 	}
 
