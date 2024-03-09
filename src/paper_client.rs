@@ -1,5 +1,6 @@
 use std::net::TcpStream;
 use thiserror::Error;
+use paper_utils::stream::Buffer;
 
 use crate::{
 	response::PaperClientResponse,
@@ -135,7 +136,7 @@ impl PaperClient {
 	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
-	pub fn set(&mut self, key: &str, value: &str, ttl: Option<u32>) -> Result<PaperClientResponse, PaperClientError> {
+	pub fn set(&mut self, key: &str, value: &Buffer, ttl: Option<u32>) -> Result<PaperClientResponse, PaperClientError> {
 		let command = Command::Set(key, value, ttl.unwrap_or(0));
 
 		self.send(&command)?;

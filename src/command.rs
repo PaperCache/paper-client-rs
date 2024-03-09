@@ -2,7 +2,7 @@ use std::net::TcpStream;
 
 use paper_utils::{
 	sheet::SheetBuilder,
-	stream::{StreamReader, StreamError},
+	stream::{Buffer, StreamReader, StreamError},
 	command::CommandByte,
 	policy::PolicyByte,
 };
@@ -18,7 +18,7 @@ pub enum Command<'a> {
 	Version,
 
 	Get(&'a str),
-	Set(&'a str, &'a str, u32),
+	Set(&'a str, &'a Buffer, u32),
 	Del(&'a str),
 
 	Has(&'a str),
@@ -58,7 +58,7 @@ impl<'a> Command<'a> {
 				SheetBuilder::new()
 					.write_u8(CommandByte::SET)
 					.write_str(key)
-					.write_str(value)
+					.write_buf(value)
 					.write_u32(*ttl)
 					.to_sheet()
 			},
