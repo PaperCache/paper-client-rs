@@ -132,9 +132,9 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
 	///
 	/// let value = "value"
-	/// 	.as_bytes()
-	/// 	.to_vec()
-	/// 	.into_boxed_slice();
+	///     .as_bytes()
+	///     .to_vec()
+	///     .into_boxed_slice();
 	///
 	/// match client.set("key", &value, None) {
 	///     Ok(response) => println!("{}: {}", response.is_ok(), String::from_utf8(response.data().to_vec()).unwrap()),
