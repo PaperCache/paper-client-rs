@@ -23,6 +23,7 @@ pub enum Command<'a> {
 
 	Has(&'a str),
 	Peek(&'a str),
+	Ttl(&'a str, u32),
 
 	Wipe,
 
@@ -81,6 +82,14 @@ impl<'a> Command<'a> {
 				SheetBuilder::new()
 					.write_u8(CommandByte::PEEK)
 					.write_str(key)
+					.to_sheet()
+			},
+
+			Command::Ttl(key, ttl) => {
+				SheetBuilder::new()
+					.write_u8(CommandByte::TTL)
+					.write_str(key)
+					.write_u32(*ttl)
 					.to_sheet()
 			},
 

@@ -72,7 +72,7 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
 	///
 	/// match client.ping() {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), response.data()),
+	///     Ok(response) => println!("{}: {}", response.is_ok(), String::from_utf8(response.data().to_vec()).unwrap()),
 	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
@@ -92,7 +92,7 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
 	///
 	/// match client.version() {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), response.data()),
+	///     Ok(response) => println!("{}: {}", response.is_ok(), String::from_utf8(response.data().to_vec()).unwrap()),
 	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
@@ -112,7 +112,7 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
 	///
 	/// match client.get("key") {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), response.data()),
+	///     Ok(response) => println!("{}: {}", response.is_ok(), String::from_utf8(response.data().to_vec()).unwrap()),
 	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
@@ -131,8 +131,13 @@ impl PaperClient {
 	///
 	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
 	///
-	/// match client.set("key", "value", None) {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), response.data()),
+	/// let value = "value"
+	/// 	.as_bytes()
+	/// 	.to_vec()
+	/// 	.into_boxed_slice();
+	///
+	/// match client.set("key", &value, None) {
+	///     Ok(response) => println!("{}: {}", response.is_ok(), String::from_utf8(response.data().to_vec()).unwrap()),
 	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
@@ -152,7 +157,7 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
 	///
 	/// match client.del("key") {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), response.data()),
+	///     Ok(response) => println!("{}: {}", response.is_ok(), String::from_utf8(response.data().to_vec()).unwrap()),
 	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
@@ -194,12 +199,32 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
 	///
 	/// match client.peek("key") {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), response.data()),
+	///     Ok(response) => println!("{}: {}", response.is_ok(), String::from_utf8(response.data().to_vec()).unwrap()),
 	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
 	pub fn peek(&mut self, key: &str) -> Result<PaperClientResponse, PaperClientError> {
 		let command = Command::Peek(key);
+
+		self.send(&command)?;
+		self.receive(&command)
+	}
+
+	/// Sets the TTL associated with the supplied key.
+	///
+	/// # Examples
+	/// ```
+	/// use paper_client::PaperClient;
+	///
+	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
+	///
+	/// match client.ttl("key", Some(5)) {
+	///     Ok(response) => println!("{}: {}", response.is_ok(), String::from_utf8(response.data().to_vec()).unwrap()),
+	///     Err(err) => println!("{:?}", err),
+	/// }
+	/// ```
+	pub fn ttl(&mut self, key: &str, ttl: Option<u32>) -> Result<PaperClientResponse, PaperClientError> {
+		let command = Command::Ttl(key, ttl.unwrap_or(0));
 
 		self.send(&command)?;
 		self.receive(&command)
@@ -214,7 +239,7 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
 	///
 	/// match client.wipe() {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), response.data()),
+	///     Ok(response) => println!("{}: {}", response.is_ok(), String::from_utf8(response.data().to_vec()).unwrap()),
 	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
@@ -234,7 +259,7 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
 	///
 	/// match client.resize(10) {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), response.data()),
+	///     Ok(response) => println!("{}: {}", response.is_ok(), String::from_utf8(response.data().to_vec()).unwrap()),
 	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
@@ -256,7 +281,7 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
 	///
 	/// match client.policy(Policy::Lru) {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), response.data()),
+	///     Ok(response) => println!("{}: {}", response.is_ok(), String::from_utf8(response.data().to_vec()).unwrap()),
 	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
