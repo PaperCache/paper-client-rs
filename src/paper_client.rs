@@ -33,7 +33,8 @@ pub enum PaperClientError {
 
 impl PaperClient {
 	/// Creates a new instance of the client and connects to the server.
-	/// If a connection could not be established, an error is returned.
+	/// If a connection could not be established, a `PaperClientError`
+	/// is returned.
 	///
 	/// # Examples
 	/// ```
