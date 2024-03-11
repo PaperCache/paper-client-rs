@@ -6,4 +6,4 @@ edition = "2021"
 [dependencies]
 paper_utils = { git = "ssh://git@github.com/Paper-Book/paper-utils.git", version = "1.0.0" }
 kwik = { git = "https://github.com/KiaShakiba/kwik-rs.git", version = "0.1.0" }
-thiserror = "1.0.56"
+thiserror = "1.0.57"
