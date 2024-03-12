@@ -142,64 +142,105 @@ impl<'a> Command<'a> {
 		let mut reader = StreamReader::new(stream);
 
 		let is_ok = reader.read_bool()?;
-		let response = reader.read_buf()?;
+		let buf = reader.read_buf()?;
 
-		Ok(PaperClientResponse::new(is_ok, response))
+		let data = match is_ok {
+			true => Ok(buf),
+
+			false => {
+				let buf = String::from_utf8(buf.to_vec())
+					.map_err(|_| StreamError::InvalidData)?;
+
+				Err(buf)
+			},
+		};
+
+		Ok(PaperClientResponse::new(data))
 	}
 
 	pub fn parse_has_stream(&self, stream: &mut TcpStream) -> Result<PaperClientResponse<bool>, StreamError> {
 		let mut reader = StreamReader::new(stream);
 
-		let is_ok = reader.read_bool()?;
-		let response = reader.read_bool()?;
+		let data = match reader.read_bool()? {
+			true => Ok(reader.read_bool()?),
 
-		Ok(PaperClientResponse::new(is_ok, response))
+			false => {
+				let buf = reader.read_buf()?;
+				let buf = String::from_utf8(buf.to_vec())
+					.map_err(|_| StreamError::InvalidData)?;
+
+				Err(buf)
+			},
+		};
+
+		Ok(PaperClientResponse::new(data))
 	}
 
 	pub fn parse_size_stream(&self, stream: &mut TcpStream) -> Result<PaperClientResponse<u64>, StreamError> {
 		let mut reader = StreamReader::new(stream);
 
-		let is_ok = reader.read_bool()?;
-		let response = reader.read_u64()?;
+		let data = match reader.read_bool()? {
+			true => Ok(reader.read_u64()?),
 
-		Ok(PaperClientResponse::new(is_ok, response))
+			false => {
+				let buf = reader.read_buf()?;
+				let buf = String::from_utf8(buf.to_vec())
+					.map_err(|_| StreamError::InvalidData)?;
+
+				Err(buf)
+			},
+		};
+
+		Ok(PaperClientResponse::new(data))
 	}
 
 	pub fn parse_stats_stream(&self, stream: &mut TcpStream) -> Result<PaperClientResponse<Stats>, StreamError> {
 		let mut reader = StreamReader::new(stream);
 
-		let is_ok = reader.read_bool()?;
+		let data = match reader.read_bool()? {
+			true => {
+				let max_size = reader.read_u64()?;
+				let used_size = reader.read_u64()?;
 
-		let max_size = reader.read_u64()?;
-		let used_size = reader.read_u64()?;
+				let total_gets = reader.read_u64()?;
+				let total_sets = reader.read_u64()?;
+				let total_dels = reader.read_u64()?;
 
-		let total_gets = reader.read_u64()?;
-		let total_sets = reader.read_u64()?;
-		let total_dels = reader.read_u64()?;
+				let miss_ratio = reader.read_f64()?;
 
-		let miss_ratio = reader.read_f64()?;
+				let policy_byte = reader.read_u8()?;
+				let uptime = reader.read_u64()?;
 
-		let policy_byte = reader.read_u8()?;
-		let uptime = reader.read_u64()?;
+				let Ok(policy) = Policy::from_byte(policy_byte) else {
+					return Err(StreamError::InvalidData);
+				};
 
-		let Ok(policy) = Policy::from_byte(policy_byte) else {
-			return Err(StreamError::InvalidData);
+				let stats = Stats::new(
+					max_size,
+					used_size,
+
+					total_gets,
+					total_sets,
+					total_dels,
+
+					miss_ratio,
+
+					policy,
+					uptime,
+				);
+
+				Ok(stats)
+			},
+
+			false => {
+				let buf = reader.read_buf()?;
+				let buf = String::from_utf8(buf.to_vec())
+					.map_err(|_| StreamError::InvalidData)?;
+
+				Err(buf)
+			},
 		};
 
-		let stats = Stats::new(
-			max_size,
-			used_size,
-
-			total_gets,
-			total_sets,
-			total_dels,
-
-			miss_ratio,
-
-			policy,
-			uptime
-		);
-
-		Ok(PaperClientResponse::<Stats>::new(is_ok, stats))
+		Ok(PaperClientResponse::new(data))
 	}
 }
