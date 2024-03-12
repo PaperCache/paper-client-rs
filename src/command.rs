@@ -24,6 +24,7 @@ pub enum Command<'a> {
 	Has(&'a str),
 	Peek(&'a str),
 	Ttl(&'a str, u32),
+	Size(&'a str),
 
 	Wipe,
 
@@ -93,6 +94,13 @@ impl<'a> Command<'a> {
 					.to_sheet()
 			},
 
+			Command::Size(key) => {
+				SheetBuilder::new()
+					.write_u8(CommandByte::SIZE)
+					.write_str(key)
+					.to_sheet()
+			},
+
 			Command::Wipe => {
 				SheetBuilder::new()
 					.write_u8(CommandByte::WIPE)
@@ -144,6 +152,15 @@ impl<'a> Command<'a> {
 
 		let is_ok = reader.read_bool()?;
 		let response = reader.read_bool()?;
+
+		Ok(PaperClientResponse::new(is_ok, response))
+	}
+
+	pub fn parse_size_stream(&self, stream: &mut TcpStream) -> Result<PaperClientResponse<u64>, StreamError> {
+		let mut reader = StreamReader::new(stream);
+
+		let is_ok = reader.read_bool()?;
+		let response = reader.read_u64()?;
 
 		Ok(PaperClientResponse::new(is_ok, response))
 	}

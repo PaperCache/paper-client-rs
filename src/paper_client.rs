@@ -231,6 +231,26 @@ impl PaperClient {
 		self.receive(&command)
 	}
 
+	/// Gets the size of the value of the supplied key from the cache in bytes.
+	///
+	/// # Examples
+	/// ```
+	/// use paper_client::PaperClient;
+	///
+	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
+	///
+	/// match client.size("key") {
+	///     Ok(response) => println!("{}: {}", response.is_ok(), response.data()),
+	///     Err(err) => println!("{:?}", err),
+	/// }
+	/// ```
+	pub fn size(&mut self, key: &str) -> Result<PaperClientResponse<u64>, PaperClientError> {
+		let command = Command::Size(key);
+
+		self.send(&command)?;
+		self.receive_size(&command)
+	}
+
 	/// Wipes the contents of the cache.
 	///
 	/// # Examples
@@ -328,6 +348,12 @@ impl PaperClient {
 	fn receive_has(&mut self, command: &Command<'_>) -> Result<PaperClientResponse<bool>, PaperClientError> {
 		command
 			.parse_has_stream(&mut self.stream)
+			.map_err(|_| PaperClientError::InvalidResponse)
+	}
+
+	fn receive_size(&mut self, command: &Command<'_>) -> Result<PaperClientResponse<u64>, PaperClientError> {
+		command
+			.parse_size_stream(&mut self.stream)
 			.map_err(|_| PaperClientError::InvalidResponse)
 	}
 
