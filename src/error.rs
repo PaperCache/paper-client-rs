@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-#[derive(Debug, Error)]
+#[derive(Debug, PartialEq, Error)]
 pub enum PaperClientError {
 	#[error("Could not connect to paper server.")]
 	InvalidAddress,
