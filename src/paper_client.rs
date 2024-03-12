@@ -1,5 +1,5 @@
 use std::net::TcpStream;
-pub use paper_utils::stream::Buffer;
+pub use paper_utils::stream::{Buffer, StreamError};
 
 use crate::{
 	error::PaperClientError,
@@ -319,7 +319,10 @@ impl PaperClient {
 	fn send(&mut self, command: &Command<'_>) -> Result<(), PaperClientError> {
 		command
 			.to_stream(&mut self.stream)
-			.map_err(|_| PaperClientError::InvalidCommand)
+			.map_err(|err| match err {
+				StreamError::InvalidStream => PaperClientError::Disconnected,
+				_ => PaperClientError::InvalidCommand,
+			})
 	}
 
 	fn receive(&mut self, command: &Command<'_>) -> PaperClientResult<Buffer> {

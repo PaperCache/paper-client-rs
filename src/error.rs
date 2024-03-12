@@ -17,6 +17,9 @@ pub enum PaperClientError {
 	#[error("An internal error occured.")]
 	Internal,
 
+	#[error("Disconnected from PaperServer.")]
+	Disconnected,
+
 	#[error("`{0}`")]
 	CacheError(String),
 }
