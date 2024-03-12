@@ -5,7 +5,10 @@ use std::sync::{
 	atomic::{Ordering, AtomicUsize},
 };
 
-use crate::paper_client::{PaperClient, PaperClientError};
+use crate::{
+	paper_client::PaperClient,
+	error::PaperClientError,
+};
 
 #[derive(Clone)]
 pub struct PaperPool {
@@ -58,7 +61,7 @@ impl PaperPool {
 	/// let pool = PaperPool::new("127.0.0.1", 3145, 4).unwrap();
 	///
 	/// match pool.client().ping() {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), String::from_utf8(response.data().to_vec()).unwrap()),
+	///     Ok(buf) => println!("{}", String::from_utf8(buf.to_vec()).unwrap()),
 	///     Err(err) => println!("{:?}", err),
 	/// };
 	/// ```

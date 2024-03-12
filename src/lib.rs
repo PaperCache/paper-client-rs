@@ -1,16 +1,16 @@
 pub mod paper_client;
-pub use paper_client::*;
+pub use crate::paper_client::*;
+
+pub mod error;
+pub use crate::error::*;
 
 pub mod paper_pool;
-pub use paper_pool::*;
-
-pub mod response;
-pub use response::*;
+pub use crate::paper_pool::*;
 
 pub mod policy;
-pub use policy::*;
+pub use crate::policy::*;
 
 pub mod stats;
-pub use stats::*;
+pub use crate::stats::*;
 
 mod command;

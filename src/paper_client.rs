@@ -1,34 +1,17 @@
 use std::net::TcpStream;
-use thiserror::Error;
-use paper_utils::stream::Buffer;
+pub use paper_utils::stream::Buffer;
 
 use crate::{
-	response::PaperClientResponse,
+	error::PaperClientError,
 	command::Command,
 	policy::Policy,
 	stats::Stats,
 };
 
+pub type PaperClientResult<T> = Result<T, PaperClientError>;
+
 pub struct PaperClient {
 	stream: TcpStream,
-}
-
-#[derive(Debug, Error)]
-pub enum PaperClientError {
-	#[error("Could not connect to paper server.")]
-	InvalidAddress,
-
-	#[error("Could not send command to server.")]
-	InvalidCommand,
-
-	#[error("Could not receive response from server.")]
-	InvalidResponse,
-
-	#[error("Connection was rejected by paper server.")]
-	Rejected,
-
-	#[error("An internal error occured.")]
-	Internal,
 }
 
 impl PaperClient {
@@ -42,7 +25,7 @@ impl PaperClient {
 	///
 	/// let client = PaperClient::new("127.0.0.1", 3145).unwrap();
 	/// ```
-	pub fn new(host: &str, port: u32) -> Result<Self, PaperClientError> {
+	pub fn new(host: &str, port: u32) -> PaperClientResult<Self> {
 		let addr = format!("{}:{}", host, port);
 
 		let Ok(stream) = TcpStream::connect(addr) else {
@@ -73,11 +56,11 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
 	///
 	/// match client.ping() {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), String::from_utf8(response.data().to_vec()).unwrap()),
+	///     Ok(buf) => println!("{}", String::from_utf8(buf.to_vec()).unwrap()),
 	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
-	pub fn ping(&mut self) -> Result<PaperClientResponse, PaperClientError> {
+	pub fn ping(&mut self) -> PaperClientResult<Buffer> {
 		let command = Command::Ping;
 
 		self.send(&command)?;
@@ -93,11 +76,11 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
 	///
 	/// match client.version() {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), String::from_utf8(response.data().to_vec()).unwrap()),
+	///     Ok(buf) => println!("{}", String::from_utf8(buf.to_vec()).unwrap()),
 	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
-	pub fn version(&mut self) -> Result<PaperClientResponse, PaperClientError> {
+	pub fn version(&mut self) -> PaperClientResult<Buffer> {
 		let command = Command::Version;
 
 		self.send(&command)?;
@@ -113,11 +96,11 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
 	///
 	/// match client.get("key") {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), String::from_utf8(response.data().to_vec()).unwrap()),
+	///     Ok(buf) => println!("{}", String::from_utf8(buf.to_vec()).unwrap()),
 	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
-	pub fn get(&mut self, key: &str) -> Result<PaperClientResponse, PaperClientError> {
+	pub fn get(&mut self, key: &str) -> PaperClientResult<Buffer> {
 		let command = Command::Get(key);
 
 		self.send(&command)?;
@@ -138,11 +121,11 @@ impl PaperClient {
 	///     .into_boxed_slice();
 	///
 	/// match client.set("key", &value, None) {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), String::from_utf8(response.data().to_vec()).unwrap()),
+	///     Ok(buf) => println!("{}", String::from_utf8(buf.to_vec()).unwrap()),
 	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
-	pub fn set(&mut self, key: &str, value: &Buffer, ttl: Option<u32>) -> Result<PaperClientResponse, PaperClientError> {
+	pub fn set(&mut self, key: &str, value: &Buffer, ttl: Option<u32>) -> PaperClientResult<Buffer> {
 		let command = Command::Set(key, value, ttl.unwrap_or(0));
 
 		self.send(&command)?;
@@ -158,11 +141,11 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
 	///
 	/// match client.del("key") {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), String::from_utf8(response.data().to_vec()).unwrap()),
+	///     Ok(buf) => println!("{}", String::from_utf8(buf.to_vec()).unwrap()),
 	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
-	pub fn del(&mut self, key: &str) -> Result<PaperClientResponse, PaperClientError> {
+	pub fn del(&mut self, key: &str) -> PaperClientResult<Buffer> {
 		let command = Command::Del(key);
 
 		self.send(&command)?;
@@ -179,11 +162,11 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
 	///
 	/// match client.has("key") {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), response.data()),
+	///     Ok(has) => println!("{}", has),
 	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
-	pub fn has(&mut self, key: &str) -> Result<PaperClientResponse<bool>, PaperClientError> {
+	pub fn has(&mut self, key: &str) -> PaperClientResult<bool> {
 		let command = Command::Has(key);
 
 		self.send(&command)?;
@@ -200,11 +183,11 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
 	///
 	/// match client.peek("key") {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), String::from_utf8(response.data().to_vec()).unwrap()),
+	///     Ok(buf) => println!("{}", String::from_utf8(buf.to_vec()).unwrap()),
 	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
-	pub fn peek(&mut self, key: &str) -> Result<PaperClientResponse, PaperClientError> {
+	pub fn peek(&mut self, key: &str) -> PaperClientResult<Buffer> {
 		let command = Command::Peek(key);
 
 		self.send(&command)?;
@@ -220,11 +203,11 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
 	///
 	/// match client.ttl("key", Some(5)) {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), String::from_utf8(response.data().to_vec()).unwrap()),
+	///     Ok(buf) => println!("{}", String::from_utf8(buf.to_vec()).unwrap()),
 	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
-	pub fn ttl(&mut self, key: &str, ttl: Option<u32>) -> Result<PaperClientResponse, PaperClientError> {
+	pub fn ttl(&mut self, key: &str, ttl: Option<u32>) -> PaperClientResult<Buffer> {
 		let command = Command::Ttl(key, ttl.unwrap_or(0));
 
 		self.send(&command)?;
@@ -240,11 +223,11 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
 	///
 	/// match client.size("key") {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), response.data()),
+	///     Ok(size) => println!("{}", size),
 	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
-	pub fn size(&mut self, key: &str) -> Result<PaperClientResponse<u64>, PaperClientError> {
+	pub fn size(&mut self, key: &str) -> PaperClientResult<u64> {
 		let command = Command::Size(key);
 
 		self.send(&command)?;
@@ -260,11 +243,11 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
 	///
 	/// match client.wipe() {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), String::from_utf8(response.data().to_vec()).unwrap()),
+	///     Ok(buf) => println!("{}", String::from_utf8(buf.to_vec()).unwrap()),
 	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
-	pub fn wipe(&mut self) -> Result<PaperClientResponse, PaperClientError> {
+	pub fn wipe(&mut self) -> PaperClientResult<Buffer> {
 		let command = Command::Wipe;
 
 		self.send(&command)?;
@@ -280,11 +263,11 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
 	///
 	/// match client.resize(10) {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), String::from_utf8(response.data().to_vec()).unwrap()),
+	///     Ok(buf) => println!("{}", String::from_utf8(buf.to_vec()).unwrap()),
 	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
-	pub fn resize(&mut self, size: u64) -> Result<PaperClientResponse, PaperClientError> {
+	pub fn resize(&mut self, size: u64) -> PaperClientResult<Buffer> {
 		let command = Command::Resize(size);
 
 		self.send(&command)?;
@@ -302,11 +285,11 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
 	///
 	/// match client.policy(Policy::Lru) {
-	///     Ok(response) => println!("{}: {}", response.is_ok(), String::from_utf8(response.data().to_vec()).unwrap()),
+	///     Ok(buf) => println!("{}", String::from_utf8(buf.to_vec()).unwrap()),
 	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
-	pub fn policy(&mut self, policy: Policy) -> Result<PaperClientResponse, PaperClientError> {
+	pub fn policy(&mut self, policy: Policy) -> PaperClientResult<Buffer> {
 		let command = Command::Policy(policy);
 
 		self.send(&command)?;
@@ -322,11 +305,11 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
 	///
 	/// match client.stats() {
-	///     Ok(response) => println!("{}: {:?}", response.is_ok(), response.data()),
+	///     Ok(stats) => println!("{:?}", stats),
 	///     Err(err) => println!("{:?}", err),
 	/// }
 	/// ```
-	pub fn stats(&mut self) -> Result<PaperClientResponse<Stats>, PaperClientError> {
+	pub fn stats(&mut self) -> PaperClientResult<Stats> {
 		let command = Command::Stats;
 
 		self.send(&command)?;
@@ -339,25 +322,25 @@ impl PaperClient {
 			.map_err(|_| PaperClientError::InvalidCommand)
 	}
 
-	fn receive(&mut self, command: &Command<'_>) -> Result<PaperClientResponse, PaperClientError> {
+	fn receive(&mut self, command: &Command<'_>) -> PaperClientResult<Buffer> {
 		command
 			.parse_buf_stream(&mut self.stream)
 			.map_err(|_| PaperClientError::InvalidResponse)
 	}
 
-	fn receive_has(&mut self, command: &Command<'_>) -> Result<PaperClientResponse<bool>, PaperClientError> {
+	fn receive_has(&mut self, command: &Command<'_>) -> PaperClientResult<bool> {
 		command
 			.parse_has_stream(&mut self.stream)
 			.map_err(|_| PaperClientError::InvalidResponse)
 	}
 
-	fn receive_size(&mut self, command: &Command<'_>) -> Result<PaperClientResponse<u64>, PaperClientError> {
+	fn receive_size(&mut self, command: &Command<'_>) -> PaperClientResult<u64> {
 		command
 			.parse_size_stream(&mut self.stream)
 			.map_err(|_| PaperClientError::InvalidResponse)
 	}
 
-	fn receive_stats(&mut self, command: &Command<'_>) -> Result<PaperClientResponse<Stats>, PaperClientError> {
+	fn receive_stats(&mut self, command: &Command<'_>) -> PaperClientResult<Stats> {
 		command
 			.parse_stats_stream(&mut self.stream)
 			.map_err(|_| PaperClientError::InvalidResponse)

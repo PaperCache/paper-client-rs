@@ -1,5 +1,5 @@
 use paper_utils::policy::PolicyByte;
-use crate::paper_client::PaperClientError;
+use crate::error::PaperClientError;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Policy {

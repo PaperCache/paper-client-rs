@@ -8,7 +8,8 @@ use paper_utils::{
 };
 
 use crate::{
-	response::PaperClientResponse,
+	paper_client::PaperClientResult,
+	error::PaperClientError,
 	policy::Policy,
 	stats::Stats,
 };
@@ -138,82 +139,77 @@ impl<'a> Command<'a> {
 		sheet.to_stream(stream)
 	}
 
-	pub fn parse_buf_stream(&self, stream: &mut TcpStream) -> Result<PaperClientResponse, StreamError> {
+	pub fn parse_buf_stream(&self, stream: &mut TcpStream) -> PaperClientResult<Buffer> {
 		let mut reader = StreamReader::new(stream);
 
-		let is_ok = reader.read_bool()?;
-		let buf = reader.read_buf()?;
+		let is_ok = reader.read_bool().map_err(|_| PaperClientError::InvalidResponse)?;
+		let buf = reader.read_buf().map_err(|_| PaperClientError::InvalidResponse)?;
 
-		let data = match is_ok {
+		match is_ok {
 			true => Ok(buf),
 
 			false => {
-				let buf = String::from_utf8(buf.to_vec())
-					.map_err(|_| StreamError::InvalidData)?;
+				let message = String::from_utf8(buf.to_vec())
+					.map_err(|_| PaperClientError::InvalidResponse)?;
 
-				Err(buf)
+				Err(PaperClientError::CacheError(message))
 			},
-		};
-
-		Ok(PaperClientResponse::new(data))
+		}
 	}
 
-	pub fn parse_has_stream(&self, stream: &mut TcpStream) -> Result<PaperClientResponse<bool>, StreamError> {
+	pub fn parse_has_stream(&self, stream: &mut TcpStream) -> PaperClientResult<bool> {
 		let mut reader = StreamReader::new(stream);
 
-		let data = match reader.read_bool()? {
-			true => Ok(reader.read_bool()?),
+		match reader.read_bool().map_err(|_| PaperClientError::InvalidResponse)? {
+			true => Ok(reader.read_bool().map_err(|_| PaperClientError::InvalidResponse)?),
 
 			false => {
-				let buf = reader.read_buf()?;
-				let buf = String::from_utf8(buf.to_vec())
-					.map_err(|_| StreamError::InvalidData)?;
+				let buf = reader.read_buf().map_err(|_| PaperClientError::InvalidResponse)?;
 
-				Err(buf)
+				let message = String::from_utf8(buf.to_vec())
+					.map_err(|_| PaperClientError::InvalidResponse)?;
+
+				Err(PaperClientError::CacheError(message))
 			},
-		};
-
-		Ok(PaperClientResponse::new(data))
+		}
 	}
 
-	pub fn parse_size_stream(&self, stream: &mut TcpStream) -> Result<PaperClientResponse<u64>, StreamError> {
+	pub fn parse_size_stream(&self, stream: &mut TcpStream) -> PaperClientResult<u64> {
 		let mut reader = StreamReader::new(stream);
 
-		let data = match reader.read_bool()? {
-			true => Ok(reader.read_u64()?),
+		match reader.read_bool().map_err(|_| PaperClientError::InvalidResponse)? {
+			true => Ok(reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?),
 
 			false => {
-				let buf = reader.read_buf()?;
-				let buf = String::from_utf8(buf.to_vec())
-					.map_err(|_| StreamError::InvalidData)?;
+				let buf = reader.read_buf().map_err(|_| PaperClientError::InvalidResponse)?;
 
-				Err(buf)
+				let message = String::from_utf8(buf.to_vec())
+					.map_err(|_| PaperClientError::InvalidResponse)?;
+
+				Err(PaperClientError::CacheError(message))
 			},
-		};
-
-		Ok(PaperClientResponse::new(data))
+		}
 	}
 
-	pub fn parse_stats_stream(&self, stream: &mut TcpStream) -> Result<PaperClientResponse<Stats>, StreamError> {
+	pub fn parse_stats_stream(&self, stream: &mut TcpStream) -> PaperClientResult<Stats> {
 		let mut reader = StreamReader::new(stream);
 
-		let data = match reader.read_bool()? {
+		match reader.read_bool().map_err(|_| PaperClientError::InvalidResponse)? {
 			true => {
-				let max_size = reader.read_u64()?;
-				let used_size = reader.read_u64()?;
+				let max_size = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
+				let used_size = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
 
-				let total_gets = reader.read_u64()?;
-				let total_sets = reader.read_u64()?;
-				let total_dels = reader.read_u64()?;
+				let total_gets = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
+				let total_sets = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
+				let total_dels = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
 
-				let miss_ratio = reader.read_f64()?;
+				let miss_ratio = reader.read_f64().map_err(|_| PaperClientError::InvalidResponse)?;
 
-				let policy_byte = reader.read_u8()?;
-				let uptime = reader.read_u64()?;
+				let policy_byte = reader.read_u8().map_err(|_| PaperClientError::InvalidResponse)?;
+				let uptime = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
 
-				let Ok(policy) = Policy::from_byte(policy_byte) else {
-					return Err(StreamError::InvalidData);
-				};
+				let policy = Policy::from_byte(policy_byte)
+					.map_err(|_| PaperClientError::InvalidResponse)?;
 
 				let stats = Stats::new(
 					max_size,
@@ -233,14 +229,13 @@ impl<'a> Command<'a> {
 			},
 
 			false => {
-				let buf = reader.read_buf()?;
-				let buf = String::from_utf8(buf.to_vec())
-					.map_err(|_| StreamError::InvalidData)?;
+				let buf = reader.read_buf().map_err(|_| PaperClientError::InvalidResponse)?;
 
-				Err(buf)
+				let message = String::from_utf8(buf.to_vec())
+					.map_err(|_| PaperClientError::InvalidResponse)?;
+
+				Err(PaperClientError::CacheError(message))
 			},
-		};
-
-		Ok(PaperClientResponse::new(data))
+		}
 	}
 }
