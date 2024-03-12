@@ -326,26 +326,18 @@ impl PaperClient {
 	}
 
 	fn receive(&mut self, command: &Command<'_>) -> PaperClientResult<Buffer> {
-		command
-			.parse_buf_stream(&mut self.stream)
-			.map_err(|_| PaperClientError::InvalidResponse)
+		command.parse_buf_stream(&mut self.stream)
 	}
 
 	fn receive_has(&mut self, command: &Command<'_>) -> PaperClientResult<bool> {
-		command
-			.parse_has_stream(&mut self.stream)
-			.map_err(|_| PaperClientError::InvalidResponse)
+		command.parse_has_stream(&mut self.stream)
 	}
 
 	fn receive_size(&mut self, command: &Command<'_>) -> PaperClientResult<u64> {
-		command
-			.parse_size_stream(&mut self.stream)
-			.map_err(|_| PaperClientError::InvalidResponse)
+		command.parse_size_stream(&mut self.stream)
 	}
 
 	fn receive_stats(&mut self, command: &Command<'_>) -> PaperClientResult<Stats> {
-		command
-			.parse_stats_stream(&mut self.stream)
-			.map_err(|_| PaperClientError::InvalidResponse)
+		command.parse_stats_stream(&mut self.stream)
 	}
 }

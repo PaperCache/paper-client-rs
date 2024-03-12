@@ -20,6 +20,6 @@ pub enum PaperClientError {
 	#[error("Disconnected from PaperServer.")]
 	Disconnected,
 
-	#[error("`{0}`")]
+	#[error("{0}")]
 	CacheError(String),
 }
