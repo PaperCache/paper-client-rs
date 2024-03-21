@@ -18,6 +18,8 @@ pub enum Command<'a> {
 	Ping,
 	Version,
 
+	Auth(&'a str),
+
 	Get(&'a str),
 	Set(&'a str, &'a Buffer, u32),
 	Del(&'a str),
@@ -47,6 +49,13 @@ impl<'a> Command<'a> {
 			Command::Version => {
 				SheetBuilder::new()
 					.write_u8(CommandByte::VERSION)
+					.to_sheet()
+			},
+
+			Command::Auth(token) => {
+				SheetBuilder::new()
+					.write_u8(CommandByte::AUTH)
+					.write_str(token)
 					.to_sheet()
 			},
 

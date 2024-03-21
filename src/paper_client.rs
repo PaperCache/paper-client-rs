@@ -87,6 +87,28 @@ impl PaperClient {
 		self.receive(&command)
 	}
 
+	/// Attempts to authorize the connection with the supplied auth token. This
+	/// must match the auth token specified in the server's configuration to be
+	/// successful.
+	///
+	/// # Examples
+	/// ```
+	/// use paper_client::PaperClient;
+	///
+	/// let mut client = PaperClient::new("127.0.0.1", 3145).unwrap();
+	///
+	/// match client.auth("my_token") {
+	///     Ok(buf) => println!("{}", String::from_utf8(buf.to_vec()).unwrap()),
+	///     Err(err) => println!("{:?}", err),
+	/// }
+	/// ```
+	pub fn auth(&mut self, token: &str) -> PaperClientResult<Buffer> {
+		let command = Command::Auth(token);
+
+		self.send(&command)?;
+		self.receive(&command)
+	}
+
 	/// Gets the value of the supplied key from the cache.
 	///
 	/// # Examples

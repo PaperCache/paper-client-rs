@@ -49,6 +49,28 @@ impl PaperPool {
 		Ok(pool)
 	}
 
+	/// Attempts to authorize each client with the supplied auth token.
+	///
+	/// # Examples
+	/// ```
+	/// use paper_client::PaperPool;
+	///
+	/// let pool = PaperPool::new("127.0.0.1", 3145, 4).unwrap();
+	///
+	/// if let Err(err) = pool.auth("my_token") {
+	///     println!("{:?}", err);
+	/// };
+	/// ```
+	pub fn auth(&self, token: &str) -> Result<(), PaperClientError> {
+		for client in self.clients.iter() {
+			client
+				.lock().expect("Could not obtain client.")
+				.auth(token)?;
+		}
+
+		Ok(())
+	}
+
 	/// Obtains a guarded `PaperClient`. Use this client, then drop the
 	/// reference (or allow it to go out of scope). Do not hold a reference
 	/// to this client, otherwise the client will be unusable by other
