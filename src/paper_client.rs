@@ -8,9 +8,16 @@ use crate::{
 	stats::Stats,
 };
 
+const RECONNECT_MAX_ATTEMPTS: u8 = 3;
+
 pub type PaperClientResult<T> = Result<T, PaperClientError>;
 
 pub struct PaperClient {
+	addr: String,
+
+	auth_token: Option<String>,
+	reconnect_attempts: u8,
+
 	stream: TcpStream,
 }
 
@@ -27,16 +34,14 @@ impl PaperClient {
 	/// ```
 	pub fn new(host: &str, port: u32) -> PaperClientResult<Self> {
 		let addr = format!("{}:{}", host, port);
-
-		let Ok(stream) = TcpStream::connect(addr) else {
-			return Err(PaperClientError::InvalidAddress);
-		};
-
-		if stream.set_nodelay(true).is_err() {
-			return Err(PaperClientError::Internal);
-		}
+		let stream = init_stream(&addr)?;
 
 		let mut client = PaperClient {
+			addr,
+
+			auth_token: None,
+			reconnect_attempts: 0,
+
 			stream,
 		};
 
@@ -61,10 +66,7 @@ impl PaperClient {
 	/// }
 	/// ```
 	pub fn ping(&mut self) -> PaperClientResult<Buffer> {
-		let command = Command::Ping;
-
-		self.send(&command)?;
-		self.receive(&command)
+		self.process(&Command::Ping)
 	}
 
 	/// Gets the cache version.
@@ -81,10 +83,7 @@ impl PaperClient {
 	/// }
 	/// ```
 	pub fn version(&mut self) -> PaperClientResult<Buffer> {
-		let command = Command::Version;
-
-		self.send(&command)?;
-		self.receive(&command)
+		self.process(&Command::Version)
 	}
 
 	/// Attempts to authorize the connection with the supplied auth token. This
@@ -104,9 +103,11 @@ impl PaperClient {
 	/// ```
 	pub fn auth(&mut self, token: &str) -> PaperClientResult<Buffer> {
 		let command = Command::Auth(token);
+		let result = self.process(&command);
 
-		self.send(&command)?;
-		self.receive(&command)
+		self.auth_token = Some(token.to_owned());
+
+		result
 	}
 
 	/// Gets the value of the supplied key from the cache.
@@ -124,9 +125,7 @@ impl PaperClient {
 	/// ```
 	pub fn get(&mut self, key: &str) -> PaperClientResult<Buffer> {
 		let command = Command::Get(key);
-
-		self.send(&command)?;
-		self.receive(&command)
+		self.process(&command)
 	}
 
 	/// Sets the supplied key, value, and ttl to the cache.
@@ -149,9 +148,7 @@ impl PaperClient {
 	/// ```
 	pub fn set(&mut self, key: &str, value: &Buffer, ttl: Option<u32>) -> PaperClientResult<Buffer> {
 		let command = Command::Set(key, value, ttl.unwrap_or(0));
-
-		self.send(&command)?;
-		self.receive(&command)
+		self.process(&command)
 	}
 
 	/// Deletes the value of the supplied key from the cache.
@@ -169,9 +166,7 @@ impl PaperClient {
 	/// ```
 	pub fn del(&mut self, key: &str) -> PaperClientResult<Buffer> {
 		let command = Command::Del(key);
-
-		self.send(&command)?;
-		self.receive(&command)
+		self.process(&command)
 	}
 
 	/// Checks if the cache contains an object with the supplied key
@@ -190,9 +185,7 @@ impl PaperClient {
 	/// ```
 	pub fn has(&mut self, key: &str) -> PaperClientResult<bool> {
 		let command = Command::Has(key);
-
-		self.send(&command)?;
-		self.receive_has(&command)
+		self.process_has(&command)
 	}
 
 	/// Gets (peeks) the value of the supplied key from the cache without altering
@@ -211,9 +204,7 @@ impl PaperClient {
 	/// ```
 	pub fn peek(&mut self, key: &str) -> PaperClientResult<Buffer> {
 		let command = Command::Peek(key);
-
-		self.send(&command)?;
-		self.receive(&command)
+		self.process(&command)
 	}
 
 	/// Sets the TTL associated with the supplied key.
@@ -231,9 +222,7 @@ impl PaperClient {
 	/// ```
 	pub fn ttl(&mut self, key: &str, ttl: Option<u32>) -> PaperClientResult<Buffer> {
 		let command = Command::Ttl(key, ttl.unwrap_or(0));
-
-		self.send(&command)?;
-		self.receive(&command)
+		self.process(&command)
 	}
 
 	/// Gets the size of the value of the supplied key from the cache in bytes.
@@ -251,9 +240,7 @@ impl PaperClient {
 	/// ```
 	pub fn size(&mut self, key: &str) -> PaperClientResult<u64> {
 		let command = Command::Size(key);
-
-		self.send(&command)?;
-		self.receive_size(&command)
+		self.process_size(&command)
 	}
 
 	/// Wipes the contents of the cache.
@@ -270,10 +257,7 @@ impl PaperClient {
 	/// }
 	/// ```
 	pub fn wipe(&mut self) -> PaperClientResult<Buffer> {
-		let command = Command::Wipe;
-
-		self.send(&command)?;
-		self.receive(&command)
+		self.process(&Command::Wipe)
 	}
 
 	/// Resizes the cache to the supplied size.
@@ -291,9 +275,7 @@ impl PaperClient {
 	/// ```
 	pub fn resize(&mut self, size: u64) -> PaperClientResult<Buffer> {
 		let command = Command::Resize(size);
-
-		self.send(&command)?;
-		self.receive(&command)
+		self.process(&command)
 	}
 
 	/// Sets the cache's eviction policy.
@@ -313,9 +295,7 @@ impl PaperClient {
 	/// ```
 	pub fn policy(&mut self, policy: Policy) -> PaperClientResult<Buffer> {
 		let command = Command::Policy(policy);
-
-		self.send(&command)?;
-		self.receive(&command)
+		self.process(&command)
 	}
 
 	/// Gets the cache statistics.
@@ -332,13 +312,78 @@ impl PaperClient {
 	/// }
 	/// ```
 	pub fn stats(&mut self) -> PaperClientResult<Stats> {
-		let command = Command::Stats;
-
-		self.send(&command)?;
-		self.receive_stats(&command)
+		self.process_stats(&Command::Stats)
 	}
 
-	fn send(&mut self, command: &Command<'_>) -> Result<(), PaperClientError> {
+	fn process(&mut self, command: &Command<'_>) -> PaperClientResult<Buffer> {
+		match self.send(command).and_then(|_| self.receive(command)) {
+			Ok(response) => {
+				self.reconnect_attempts = 0;
+				Ok(response)
+			},
+
+			Err(PaperClientError::InvalidResponse) => {
+				self.reconnect_attempts += 1;
+				self.reconnect()?;
+				self.process(command)
+			},
+
+			err => err,
+		}
+	}
+
+	fn process_has(&mut self, command: &Command<'_>) -> PaperClientResult<bool> {
+		match self.send(command).and_then(|_| self.receive_has(command)) {
+			Ok(response) => {
+				self.reconnect_attempts = 0;
+				Ok(response)
+			},
+
+			Err(PaperClientError::InvalidResponse) => {
+				self.reconnect_attempts += 1;
+				self.reconnect()?;
+				self.process_has(command)
+			},
+
+			err => err,
+		}
+	}
+
+	fn process_size(&mut self, command: &Command<'_>) -> PaperClientResult<u64> {
+		match self.send(command).and_then(|_| self.receive_size(command)) {
+			Ok(response) => {
+				self.reconnect_attempts = 0;
+				Ok(response)
+			},
+
+			Err(PaperClientError::InvalidResponse) => {
+				self.reconnect_attempts += 1;
+				self.reconnect()?;
+				self.process_size(command)
+			},
+
+			err => err,
+		}
+	}
+
+	fn process_stats(&mut self, command: &Command<'_>) -> PaperClientResult<Stats> {
+		match self.send(command).and_then(|_| self.receive_stats(command)) {
+			Ok(response) => {
+				self.reconnect_attempts = 0;
+				Ok(response)
+			},
+
+			Err(PaperClientError::InvalidResponse) => {
+				self.reconnect_attempts += 1;
+				self.reconnect()?;
+				self.process_stats(command)
+			},
+
+			err => err,
+		}
+	}
+
+	fn send(&mut self, command: &Command<'_>) -> PaperClientResult<()> {
 		command
 			.to_stream(&mut self.stream)
 			.map_err(|err| match err {
@@ -362,4 +407,30 @@ impl PaperClient {
 	fn receive_stats(&mut self, command: &Command<'_>) -> PaperClientResult<Stats> {
 		command.parse_stats_stream(&mut self.stream)
 	}
+
+	fn reconnect(&mut self) -> PaperClientResult<()> {
+		if self.reconnect_attempts > RECONNECT_MAX_ATTEMPTS {
+			return Err(PaperClientError::Disconnected);
+		}
+
+		self.stream = init_stream(&self.addr)?;
+
+		if let Some(token) = self.auth_token.clone() {
+			self.auth(&token)?;
+		}
+
+		Ok(())
+	}
+}
+
+fn init_stream(addr: &str) -> PaperClientResult<TcpStream> {
+	let Ok(stream) = TcpStream::connect(addr) else {
+		return Err(PaperClientError::InvalidAddress);
+	};
+
+	if stream.set_nodelay(true).is_err() {
+		return Err(PaperClientError::Internal);
+	}
+
+	Ok(stream)
 }
