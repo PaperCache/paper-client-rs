@@ -22,3 +22,9 @@ impl FromPaperAddr for String {
 		self.as_str().to_addr()
 	}
 }
+
+impl FromPaperAddr for &String {
+	fn to_addr(&self) -> PaperClientResult<String> {
+		self.as_str().to_addr()
+	}
+}
