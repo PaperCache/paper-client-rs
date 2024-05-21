@@ -18,5 +18,5 @@ fn auth_correct() {
 	assert!(result.is_ok());
 
 	let buf = result.unwrap();
-	assert_eq!(buf.into_string(), "done");
+	assert_eq!(buf.into_string().unwrap(), "done");
 }

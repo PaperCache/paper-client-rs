@@ -1,5 +1,10 @@
 use paper_utils::stream::Buffer;
 
+use crate::{
+	paper_client::PaperClientResult,
+	error::PaperClientError,
+};
+
 pub trait AsPaperKey {
 	fn as_paper_key(&self) -> &str;
 }
@@ -15,10 +20,10 @@ pub trait IntoPaperValue {
 pub trait FromPaperValue {
 	/// Parses the value returned by the cache into a UTF-8 string.
 	///
-	/// # Panics
+	/// # Errors
 	///
-	/// Panics if the value is not a UTF-8 string.
-	fn into_string(self) -> String;
+	/// This function returns an error if the value is not a UTF-8 string.
+	fn into_string(self) -> PaperClientResult<String>;
 }
 
 impl AsPaperKey for &str {
@@ -82,7 +87,8 @@ impl IntoPaperValue for &String {
 }
 
 impl FromPaperValue for Buffer {
-	fn into_string(self) -> String {
-		String::from_utf8(self.into_vec()).unwrap()
+	fn into_string(self) -> PaperClientResult<String> {
+		String::from_utf8(self.into_vec())
+			.map_err(|_| PaperClientError::InvalidStringValue)
 	}
 }

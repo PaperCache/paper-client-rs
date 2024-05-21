@@ -11,7 +11,7 @@ fn pool_client() {
 		assert!(result.is_ok());
 
 		let buf = result.unwrap();
-		assert_eq!(buf.into_string(), "pong");
+		assert_eq!(buf.into_string().unwrap(), "pong");
 	}
 }
 

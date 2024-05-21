@@ -13,7 +13,7 @@ fn policy() {
 	assert!(result.is_ok());
 
 	let buf = result.unwrap();
-	assert_eq!(buf.into_string(), "done");
+	assert_eq!(buf.into_string().unwrap(), "done");
 
 	let policy = get_cache_policy(&mut client);
 	assert_eq!(policy, INITIAL_POLICY);
@@ -22,7 +22,7 @@ fn policy() {
 	assert!(updated.is_ok());
 
 	let buf = updated.unwrap();
-	assert_eq!(buf.into_string(), "done");
+	assert_eq!(buf.into_string().unwrap(), "done");
 
 	let policy = get_cache_policy(&mut client);
 	assert_eq!(policy, UPDATED_POLICY);

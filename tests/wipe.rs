@@ -13,7 +13,7 @@ fn wipe() {
 	assert!(result.is_ok());
 
 	let buf = result.unwrap();
-	assert_eq!(buf.into_string(), "done");
+	assert_eq!(buf.into_string().unwrap(), "done");
 
 	let got = client.get("key");
 	assert!(got.is_err());

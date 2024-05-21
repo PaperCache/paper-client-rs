@@ -13,7 +13,7 @@ fn resize() {
 	assert!(result.is_ok());
 
 	let buf = result.unwrap();
-	assert_eq!(buf.into_string(), "done");
+	assert_eq!(buf.into_string().unwrap(), "done");
 
 	let size = get_cache_size(&mut client);
 	assert_eq!(size, INITIAL_SIZE);
@@ -22,7 +22,7 @@ fn resize() {
 	assert!(updated.is_ok());
 
 	let buf = updated.unwrap();
-	assert_eq!(buf.into_string(), "done");
+	assert_eq!(buf.into_string().unwrap(), "done");
 
 	let size = get_cache_size(&mut client);
 	assert_eq!(size, UPDATED_SIZE);

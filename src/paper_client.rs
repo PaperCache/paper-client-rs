@@ -62,7 +62,7 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("paper://127.0.0.1:3145").unwrap();
 	///
 	/// match client.ping() {
-	///     Ok(buf) => println!("{}", buf.into_string()),
+	///     Ok(buf) => println!("{}", buf.into_string().unwrap()),
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
@@ -79,7 +79,7 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("paper://127.0.0.1:3145").unwrap();
 	///
 	/// match client.version() {
-	///     Ok(buf) => println!("{}", buf.into_string()),
+	///     Ok(buf) => println!("{}", buf.into_string().unwrap()),
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
@@ -98,7 +98,7 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("paper://127.0.0.1:3145").unwrap();
 	///
 	/// match client.auth("my_token") {
-	///     Ok(buf) => println!("{}", buf.into_string()),
+	///     Ok(buf) => println!("{}", buf.into_string().unwrap()),
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
@@ -122,7 +122,7 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("paper://127.0.0.1:3145").unwrap();
 	///
 	/// match client.get("key") {
-	///     Ok(buf) => println!("{}", buf.into_string()),
+	///     Ok(buf) => println!("{}", buf.into_string().unwrap()),
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
@@ -140,7 +140,7 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("paper://127.0.0.1:3145").unwrap();
 	///
 	/// match client.set("key", "value", None) {
-	///     Ok(buf) => println!("{}", buf.into_string()),
+	///     Ok(buf) => println!("{}", buf.into_string().unwrap()),
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
@@ -163,7 +163,7 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("paper://127.0.0.1:3145").unwrap();
 	///
 	/// match client.del("key") {
-	///     Ok(buf) => println!("{}", buf.into_string()),
+	///     Ok(buf) => println!("{}", buf.into_string().unwrap()),
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
@@ -201,7 +201,7 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("paper://127.0.0.1:3145").unwrap();
 	///
 	/// match client.peek("key") {
-	///     Ok(buf) => println!("{}", buf.into_string()),
+	///     Ok(buf) => println!("{}", buf.into_string().unwrap()),
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
@@ -219,7 +219,7 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("paper://127.0.0.1:3145").unwrap();
 	///
 	/// match client.ttl("key", Some(5)) {
-	///     Ok(buf) => println!("{}", buf.into_string()),
+	///     Ok(buf) => println!("{}", buf.into_string().unwrap()),
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
@@ -255,7 +255,7 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("paper://127.0.0.1:3145").unwrap();
 	///
 	/// match client.wipe() {
-	///     Ok(buf) => println!("{}", buf.into_string()),
+	///     Ok(buf) => println!("{}", buf.into_string().unwrap()),
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
@@ -272,7 +272,7 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("paper://127.0.0.1:3145").unwrap();
 	///
 	/// match client.resize(10) {
-	///     Ok(buf) => println!("{}", buf.into_string()),
+	///     Ok(buf) => println!("{}", buf.into_string().unwrap()),
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
@@ -290,7 +290,7 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("paper://127.0.0.1:3145").unwrap();
 	///
 	/// match client.policy(Policy::Lru) {
-	///     Ok(buf) => println!("{}", buf.into_string()),
+	///     Ok(buf) => println!("{}", buf.into_string().unwrap()),
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```

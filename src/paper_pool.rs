@@ -55,7 +55,7 @@ impl PaperPool {
 	/// let pool = PaperPool::new("paper://127.0.0.1:3145", 4).unwrap();
 	///
 	/// if let Err(err) = pool.auth("my_token") {
-	///     println!("{:?}", err);
+	///     println!("{err:?}");
 	/// };
 	/// ```
 	pub fn auth(&self, token: &str) -> Result<(), PaperClientError> {
@@ -75,13 +75,13 @@ impl PaperPool {
 	///
 	/// # Examples
 	/// ```
-	/// use paper_client::PaperPool;
+	/// use paper_client::{PaperPool, FromPaperValue};
 	///
 	/// let pool = PaperPool::new("paper://127.0.0.1:3145", 4).unwrap();
 	///
 	/// match pool.client().ping() {
-	///     Ok(buf) => println!("{}", String::from_utf8(buf.to_vec()).unwrap()),
-	///     Err(err) => println!("{:?}", err),
+	///     Ok(buf) => println!("{}", buf.into_string().unwrap()),
+	///     Err(err) => println!("{err:?}"),
 	/// };
 	/// ```
 	pub fn client(&self) -> MutexGuard<PaperClient> {

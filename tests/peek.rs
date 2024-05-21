@@ -14,7 +14,7 @@ fn peek_existent() {
 	assert!(result.is_ok());
 
 	let buf = result.unwrap();
-	assert_eq!(buf.into_string(), "value");
+	assert_eq!(buf.into_string().unwrap(), "value");
 }
 
 #[test]
