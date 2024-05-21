@@ -21,7 +21,7 @@ pub enum Command<'a> {
 	Auth(&'a str),
 
 	Get(&'a str),
-	Set(&'a str, &'a Buffer, u32),
+	Set(&'a str, Buffer, u32),
 	Del(&'a str),
 
 	Has(&'a str),

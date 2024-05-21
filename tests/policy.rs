@@ -1,6 +1,6 @@
 mod common;
 
-use paper_client::{PaperClient, Policy};
+use paper_client::{PaperClient, Policy, FromPaperValue};
 
 const INITIAL_POLICY: Policy = Policy::Lfu;
 const UPDATED_POLICY: Policy = Policy::Fifo;
@@ -13,7 +13,7 @@ fn policy() {
 	assert!(result.is_ok());
 
 	let buf = result.unwrap();
-	assert_eq!(buf.to_vec(), b"done");
+	assert_eq!(buf.into_string(), "done");
 
 	let policy = get_cache_policy(&mut client);
 	assert_eq!(policy, INITIAL_POLICY);
@@ -22,7 +22,7 @@ fn policy() {
 	assert!(updated.is_ok());
 
 	let buf = updated.unwrap();
-	assert_eq!(buf.to_vec(), b"done");
+	assert_eq!(buf.into_string(), "done");
 
 	let policy = get_cache_policy(&mut client);
 	assert_eq!(policy, UPDATED_POLICY);

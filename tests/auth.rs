@@ -1,5 +1,7 @@
 mod common;
 
+use paper_client::FromPaperValue;
+
 #[test]
 fn auth_incorrect() {
 	let mut client = common::init_client(false);
@@ -16,5 +18,5 @@ fn auth_correct() {
 	assert!(result.is_ok());
 
 	let buf = result.unwrap();
-	assert_eq!(buf.to_vec(), b"done");
+	assert_eq!(buf.into_string(), "done");
 }

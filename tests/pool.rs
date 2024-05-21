@@ -1,5 +1,5 @@
 use serial_test::serial;
-use paper_client::PaperPool;
+use paper_client::{PaperPool, FromPaperValue};
 
 #[test]
 #[serial]
@@ -11,7 +11,7 @@ fn pool_client() {
 		assert!(result.is_ok());
 
 		let buf = result.unwrap();
-		assert_eq!(buf.to_vec(), b"pong");
+		assert_eq!(buf.into_string(), "pong");
 	}
 }
 
@@ -37,6 +37,6 @@ fn pool_auth_valid() {
 }
 
 fn init_pool() -> PaperPool {
-	PaperPool::new("127.0.0.1", 3145, 2)
+	PaperPool::new("paper://127.0.0.1:3145", 2)
 		.expect("Could not connect pool.")
 }

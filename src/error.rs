@@ -2,8 +2,11 @@ use thiserror::Error;
 
 #[derive(Debug, PartialEq, Error)]
 pub enum PaperClientError {
-	#[error("Could not connect to PaperServer.")]
+	#[error("Invalid PaperCache address.")]
 	InvalidAddress,
+
+	#[error("Could not connect to PaperServer.")]
+	UnreachableServer,
 
 	#[error("Could not send command to PaperServer.")]
 	InvalidCommand,

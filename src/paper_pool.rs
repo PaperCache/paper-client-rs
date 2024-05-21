@@ -8,6 +8,7 @@ use std::sync::{
 use crate::{
 	paper_client::PaperClient,
 	error::PaperClientError,
+	addr::FromPaperAddr,
 };
 
 #[derive(Clone)]
@@ -25,19 +26,15 @@ impl PaperPool {
 	/// ```
 	/// use paper_client::PaperPool;
 	///
-	/// let pool = PaperPool::new("127.0.0.1", 3145, 4).unwrap();
+	/// let pool = PaperPool::new("paper://127.0.0.1:3145", 4).unwrap();
 	/// ```
-	pub fn new(
-		host: &str,
-		port: u32,
-		size: usize,
-	) -> Result<Self, PaperClientError> {
+	pub fn new(paper_addr: impl FromPaperAddr, size: usize) -> Result<Self, PaperClientError> {
 		assert!(size > 0);
 
 		let mut clients = Vec::new();
 
 		for _ in 0..size {
-			let client = PaperClient::new(host, port)?;
+			let client = PaperClient::new(paper_addr.clone())?;
 			clients.push(Arc::new(Mutex::new(client)));
 		}
 
@@ -55,7 +52,7 @@ impl PaperPool {
 	/// ```
 	/// use paper_client::PaperPool;
 	///
-	/// let pool = PaperPool::new("127.0.0.1", 3145, 4).unwrap();
+	/// let pool = PaperPool::new("paper://127.0.0.1:3145", 4).unwrap();
 	///
 	/// if let Err(err) = pool.auth("my_token") {
 	///     println!("{:?}", err);
@@ -80,7 +77,7 @@ impl PaperPool {
 	/// ```
 	/// use paper_client::PaperPool;
 	///
-	/// let pool = PaperPool::new("127.0.0.1", 3145, 4).unwrap();
+	/// let pool = PaperPool::new("paper://127.0.0.1:3145", 4).unwrap();
 	///
 	/// match pool.client().ping() {
 	///     Ok(buf) => println!("{}", String::from_utf8(buf.to_vec()).unwrap()),

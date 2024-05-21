@@ -1,6 +1,6 @@
 mod common;
 
-use paper_client::PaperClient;
+use paper_client::{PaperClient, FromPaperValue};
 
 const INITIAL_SIZE: u64 = 10 * 1024u64.pow(2);
 const UPDATED_SIZE: u64 = 20 * 1024u64.pow(2);
@@ -13,7 +13,7 @@ fn resize() {
 	assert!(result.is_ok());
 
 	let buf = result.unwrap();
-	assert_eq!(buf.to_vec(), b"done");
+	assert_eq!(buf.into_string(), "done");
 
 	let size = get_cache_size(&mut client);
 	assert_eq!(size, INITIAL_SIZE);
@@ -22,7 +22,7 @@ fn resize() {
 	assert!(updated.is_ok());
 
 	let buf = updated.unwrap();
-	assert_eq!(buf.to_vec(), b"done");
+	assert_eq!(buf.into_string(), "done");
 
 	let size = get_cache_size(&mut client);
 	assert_eq!(size, UPDATED_SIZE);

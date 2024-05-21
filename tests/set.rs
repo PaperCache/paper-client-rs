@@ -6,21 +6,18 @@ use std::{
 };
 
 use serial_test::serial;
+use paper_client::FromPaperValue;
 
 #[test]
 #[serial]
 fn set_no_ttl() {
 	let mut client = common::init_client(true);
 
-	let value = b"value"
-		.to_vec()
-		.into_boxed_slice();
-
-	let result = client.set("key", &value, None);
+	let result = client.set("key", "value", None);
 	assert!(result.is_ok());
 
 	let buf = result.unwrap();
-	assert_eq!(buf.to_vec(), b"done");
+	assert_eq!(buf.into_string(), "done");
 }
 
 #[test]
@@ -28,15 +25,11 @@ fn set_no_ttl() {
 fn set_ttl() {
 	let mut client = common::init_client(true);
 
-	let value = b"value"
-		.to_vec()
-		.into_boxed_slice();
-
-	let result = client.set("key", &value, Some(1));
+	let result = client.set("key", "value", Some(1));
 	assert!(result.is_ok());
 
 	let buf = result.unwrap();
-	assert_eq!(buf.to_vec(), b"done");
+	assert_eq!(buf.into_string(), "done");
 }
 
 #[test]
@@ -44,11 +37,7 @@ fn set_ttl() {
 fn set_ttl_expiry() {
 	let mut client = common::init_client(true);
 
-	let value = b"value"
-		.to_vec()
-		.into_boxed_slice();
-
-	let result = client.set("key", &value, Some(1));
+	let result = client.set("key", "value", Some(1));
 	assert!(result.is_ok());
 
 	let got = client.get("key");

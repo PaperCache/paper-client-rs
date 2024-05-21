@@ -1,5 +1,7 @@
 mod common;
 
+use paper_client::FromPaperValue;
+
 #[test]
 fn ping() {
 	let mut client = common::init_client(true);
@@ -8,5 +10,5 @@ fn ping() {
 	assert!(result.is_ok());
 
 	let buf = result.unwrap();
-	assert_eq!(buf.to_vec(), b"pong");
+	assert_eq!(buf.into_string(), "pong");
 }
