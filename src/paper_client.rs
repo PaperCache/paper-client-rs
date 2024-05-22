@@ -35,10 +35,11 @@ impl PaperClient {
 	/// let client = PaperClient::new("paper://127.0.0.1:3145").unwrap();
 	/// ```
 	pub fn new(paper_addr: impl FromPaperAddr) -> PaperClientResult<Self> {
-		let stream = init_stream(&paper_addr)?;
+		let addr = paper_addr.to_addr()?;
+		let stream = init_stream(&addr)?;
 
 		let mut client = PaperClient {
-			addr: paper_addr.to_addr()?,
+			addr,
 
 			auth_token: None,
 			reconnect_attempts: 0,
@@ -424,12 +425,9 @@ impl PaperClient {
 	}
 }
 
-fn init_stream(paper_addr: &impl FromPaperAddr) -> PaperClientResult<TcpStream> {
-	let addr = paper_addr.to_addr()?;
-
-	let Ok(stream) = TcpStream::connect(addr) else {
-		return Err(PaperClientError::UnreachableServer);
-	};
+fn init_stream(addr: &str) -> PaperClientResult<TcpStream> {
+	let stream = TcpStream::connect(addr)
+		.map_err(|_| PaperClientError::UnreachableServer)?;
 
 	if stream.set_nodelay(true).is_err() {
 		return Err(PaperClientError::Internal);
