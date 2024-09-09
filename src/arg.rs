@@ -68,6 +68,18 @@ impl IntoPaperValue for Buffer {
 	}
 }
 
+impl IntoPaperValue for Vec<u8> {
+	fn into_paper_value(self) -> Buffer {
+		self.into_boxed_slice()
+	}
+}
+
+impl IntoPaperValue for &[u8] {
+	fn into_paper_value(self) -> Buffer {
+		self.to_vec().into_paper_value()
+	}
+}
+
 impl IntoPaperValue for &str {
 	fn into_paper_value(self) -> Buffer {
 		self.as_bytes().into()
