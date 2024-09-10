@@ -149,12 +149,16 @@ impl PaperClient {
 	pub fn set(
 		&mut self,
 		key: impl AsPaperKey,
-		value: impl Into<PaperValue>,
+		value: impl TryInto<PaperValue>,
 		ttl: Option<u32>,
 	) -> PaperClientResult<PaperValue> {
+		let value: PaperValue = value
+			.try_into()
+			.map_err(|_| PaperClientError::InvalidValue)?;
+
 		let command = Command::Set(
 			key.as_paper_key(),
-			value.into(),
+			value,
 			ttl.unwrap_or(0),
 		);
 

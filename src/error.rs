@@ -11,6 +11,9 @@ pub enum PaperClientError {
 	#[error("Could not send command to PaperServer.")]
 	InvalidCommand,
 
+	#[error("Could not parse supplied value as PaperValue.")]
+	InvalidValue,
+
 	#[error("Could not receive response from PaperServer.")]
 	InvalidResponse,
 
