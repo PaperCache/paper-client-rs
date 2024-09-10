@@ -1,7 +1,6 @@
 mod common;
 
 use serial_test::serial;
-use paper_client::FromPaperValue;
 
 #[test]
 #[serial]
@@ -13,8 +12,10 @@ fn peek_existent() {
 	let result = client.peek("key");
 	assert!(result.is_ok());
 
-	let buf = result.unwrap();
-	assert_eq!(buf.into_string().unwrap(), "value");
+	let value: String = result.unwrap()
+		.try_into().unwrap();
+
+	assert_eq!(value, "value");
 }
 
 #[test]

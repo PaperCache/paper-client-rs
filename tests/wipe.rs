@@ -1,7 +1,5 @@
 mod common;
 
-use paper_client::FromPaperValue;
-
 #[test]
 fn wipe() {
 	let mut client = common::init_client(true);
@@ -12,8 +10,10 @@ fn wipe() {
 	let result = client.wipe();
 	assert!(result.is_ok());
 
-	let buf = result.unwrap();
-	assert_eq!(buf.into_string().unwrap(), "done");
+	let value: String = result.unwrap()
+		.try_into().unwrap();
+
+	assert_eq!(value, "done");
 
 	let got = client.get("key");
 	assert!(got.is_err());

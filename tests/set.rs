@@ -6,7 +6,6 @@ use std::{
 };
 
 use serial_test::serial;
-use paper_client::FromPaperValue;
 
 #[test]
 #[serial]
@@ -16,8 +15,10 @@ fn set_no_ttl() {
 	let result = client.set("key", "value", None);
 	assert!(result.is_ok());
 
-	let buf = result.unwrap();
-	assert_eq!(buf.into_string().unwrap(), "done");
+	let value: String = result.unwrap()
+		.try_into().unwrap();
+
+	assert_eq!(value, "done");
 }
 
 #[test]
@@ -28,8 +29,10 @@ fn set_ttl() {
 	let result = client.set("key", "value", Some(1));
 	assert!(result.is_ok());
 
-	let buf = result.unwrap();
-	assert_eq!(buf.into_string().unwrap(), "done");
+	let value: String = result.unwrap()
+		.try_into().unwrap();
+
+	assert_eq!(value, "done");
 }
 
 #[test]

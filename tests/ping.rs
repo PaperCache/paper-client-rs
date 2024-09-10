@@ -1,7 +1,5 @@
 mod common;
 
-use paper_client::FromPaperValue;
-
 #[test]
 fn ping() {
 	let mut client = common::init_client(true);
@@ -9,6 +7,8 @@ fn ping() {
 	let result = client.ping();
 	assert!(result.is_ok());
 
-	let buf = result.unwrap();
-	assert_eq!(buf.into_string().unwrap(), "pong");
+	let value: String = result.unwrap()
+		.try_into().unwrap();
+
+	assert_eq!(value, "pong");
 }

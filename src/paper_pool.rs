@@ -75,12 +75,12 @@ impl PaperPool {
 	///
 	/// # Examples
 	/// ```
-	/// use paper_client::{PaperPool, FromPaperValue};
+	/// use paper_client::PaperPool;
 	///
 	/// let pool = PaperPool::new("paper://127.0.0.1:3145", 4).unwrap();
 	///
 	/// match pool.client().ping() {
-	///     Ok(buf) => println!("{}", buf.into_string().unwrap()),
+	///     Ok(value) => println!("{value:?}"),
 	///     Err(err) => println!("{err:?}"),
 	/// };
 	/// ```

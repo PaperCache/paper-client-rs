@@ -1,5 +1,5 @@
 use serial_test::serial;
-use paper_client::{PaperPool, FromPaperValue};
+use paper_client::PaperPool;
 
 #[test]
 #[serial]
@@ -10,8 +10,10 @@ fn pool_client() {
 		let result = pool.client().ping();
 		assert!(result.is_ok());
 
-		let buf = result.unwrap();
-		assert_eq!(buf.into_string().unwrap(), "pong");
+		let value: String = result.unwrap()
+			.try_into().unwrap();
+
+		assert_eq!(value, "pong");
 	}
 }
 

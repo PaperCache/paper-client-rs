@@ -1,6 +1,7 @@
 use std::{
 	string::FromUtf8Error,
 	str::{self, Utf8Error},
+	fmt::{self, Formatter},
 };
 
 pub struct PaperValue(Box<[u8]>);
@@ -81,5 +82,20 @@ impl TryFrom<PaperValue> for String {
 
 	fn try_from(value: PaperValue) -> Result<Self, Self::Error> {
 		String::from_utf8(value.0.to_vec())
+	}
+}
+
+impl fmt::Debug for PaperValue {
+	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+		if self.0.len() > 16 {
+			return write!(f, "PaperValue(...)");
+		}
+
+		let value: Result<&str, Utf8Error> = self.try_into();
+
+		match value {
+			Ok(value) => write!(f, "PaperValue(\"{value}\")"),
+			Err(_) => write!(f, "PaperValue(...)"),
+		}
 	}
 }
