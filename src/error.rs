@@ -14,9 +14,6 @@ pub enum PaperClientError {
 	#[error("Could not receive response from PaperServer.")]
 	InvalidResponse,
 
-	#[error("Could not parse value as UTF-8 string.")]
-	InvalidStringValue,
-
 	#[error("Connection was rejected by PaperServer.")]
 	Rejected,
 

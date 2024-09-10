@@ -2,7 +2,7 @@ use std::net::TcpStream;
 
 use paper_utils::{
 	sheet::SheetBuilder,
-	stream::{Buffer, StreamReader, StreamError},
+	stream::{StreamReader, StreamError},
 	command::CommandByte,
 	policy::PolicyByte,
 };
@@ -10,6 +10,7 @@ use paper_utils::{
 use crate::{
 	paper_client::PaperClientResult,
 	error::PaperClientError,
+	value::PaperValue,
 	policy::Policy,
 	stats::Stats,
 };
@@ -21,7 +22,7 @@ pub enum Command<'a> {
 	Auth(&'a str),
 
 	Get(&'a str),
-	Set(&'a str, Buffer, u32),
+	Set(&'a str, PaperValue, u32),
 	Del(&'a str),
 
 	Has(&'a str),
@@ -70,7 +71,7 @@ impl<'a> Command<'a> {
 				SheetBuilder::new()
 					.write_u8(CommandByte::SET)
 					.write_str(key)
-					.write_buf(value)
+					.write_buf(value.into())
 					.write_u32(*ttl)
 					.to_sheet()
 			},
@@ -148,14 +149,14 @@ impl<'a> Command<'a> {
 		sheet.to_stream(stream)
 	}
 
-	pub fn parse_buf_stream(&self, stream: &mut TcpStream) -> PaperClientResult<Buffer> {
+	pub fn parse_buf_stream(&self, stream: &mut TcpStream) -> PaperClientResult<PaperValue> {
 		let mut reader = StreamReader::new(stream);
 
 		let is_ok = reader.read_bool().map_err(|_| PaperClientError::InvalidResponse)?;
 		let buf = reader.read_buf().map_err(|_| PaperClientError::InvalidResponse)?;
 
 		match is_ok {
-			true => Ok(buf),
+			true => Ok(buf.into()),
 
 			false => {
 				let message = String::from_utf8(buf.to_vec())

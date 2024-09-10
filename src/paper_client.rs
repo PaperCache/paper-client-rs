@@ -1,10 +1,11 @@
 use std::net::TcpStream;
-pub use paper_utils::stream::{Buffer, StreamError};
+pub use paper_utils::stream::StreamError;
 
 use crate::{
 	error::PaperClientError,
 	addr::FromPaperAddr,
-	arg::{AsPaperKey, AsPaperAuthToken, IntoPaperValue},
+	arg::{AsPaperKey, AsPaperAuthToken},
+	value::PaperValue,
 	command::Command,
 	policy::Policy,
 	stats::Stats,
@@ -67,7 +68,7 @@ impl PaperClient {
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
-	pub fn ping(&mut self) -> PaperClientResult<Buffer> {
+	pub fn ping(&mut self) -> PaperClientResult<PaperValue> {
 		self.process(&Command::Ping)
 	}
 
@@ -84,7 +85,7 @@ impl PaperClient {
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
-	pub fn version(&mut self) -> PaperClientResult<Buffer> {
+	pub fn version(&mut self) -> PaperClientResult<PaperValue> {
 		self.process(&Command::Version)
 	}
 
@@ -103,7 +104,7 @@ impl PaperClient {
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
-	pub fn auth(&mut self, token: impl AsPaperAuthToken) -> PaperClientResult<Buffer> {
+	pub fn auth(&mut self, token: impl AsPaperAuthToken) -> PaperClientResult<PaperValue> {
 		let auth_token = token.as_paper_auth_token();
 
 		let command = Command::Auth(auth_token);
@@ -127,7 +128,7 @@ impl PaperClient {
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
-	pub fn get(&mut self, key: impl AsPaperKey) -> PaperClientResult<Buffer> {
+	pub fn get(&mut self, key: impl AsPaperKey) -> PaperClientResult<PaperValue> {
 		let command = Command::Get(key.as_paper_key());
 		self.process(&command)
 	}
@@ -148,10 +149,15 @@ impl PaperClient {
 	pub fn set(
 		&mut self,
 		key: impl AsPaperKey,
-		value: impl IntoPaperValue,
+		value: impl Into<PaperValue>,
 		ttl: Option<u32>,
-	) -> PaperClientResult<Buffer> {
-		let command = Command::Set(key.as_paper_key(), value.into_paper_value(), ttl.unwrap_or(0));
+	) -> PaperClientResult<PaperValue> {
+		let command = Command::Set(
+			key.as_paper_key(),
+			value.into(),
+			ttl.unwrap_or(0),
+		);
+
 		self.process(&command)
 	}
 
@@ -168,7 +174,7 @@ impl PaperClient {
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
-	pub fn del(&mut self, key: impl AsPaperKey) -> PaperClientResult<Buffer> {
+	pub fn del(&mut self, key: impl AsPaperKey) -> PaperClientResult<PaperValue> {
 		let command = Command::Del(key.as_paper_key());
 		self.process(&command)
 	}
@@ -206,7 +212,7 @@ impl PaperClient {
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
-	pub fn peek(&mut self, key: impl AsPaperKey) -> PaperClientResult<Buffer> {
+	pub fn peek(&mut self, key: impl AsPaperKey) -> PaperClientResult<PaperValue> {
 		let command = Command::Peek(key.as_paper_key());
 		self.process(&command)
 	}
@@ -224,7 +230,7 @@ impl PaperClient {
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
-	pub fn ttl(&mut self, key: impl AsPaperKey, ttl: Option<u32>) -> PaperClientResult<Buffer> {
+	pub fn ttl(&mut self, key: impl AsPaperKey, ttl: Option<u32>) -> PaperClientResult<PaperValue> {
 		let command = Command::Ttl(key.as_paper_key(), ttl.unwrap_or(0));
 		self.process(&command)
 	}
@@ -260,7 +266,7 @@ impl PaperClient {
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
-	pub fn wipe(&mut self) -> PaperClientResult<Buffer> {
+	pub fn wipe(&mut self) -> PaperClientResult<PaperValue> {
 		self.process(&Command::Wipe)
 	}
 
@@ -277,7 +283,7 @@ impl PaperClient {
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
-	pub fn resize(&mut self, size: u64) -> PaperClientResult<Buffer> {
+	pub fn resize(&mut self, size: u64) -> PaperClientResult<PaperValue> {
 		let command = Command::Resize(size);
 		self.process(&command)
 	}
@@ -295,7 +301,7 @@ impl PaperClient {
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
-	pub fn policy(&mut self, policy: Policy) -> PaperClientResult<Buffer> {
+	pub fn policy(&mut self, policy: Policy) -> PaperClientResult<PaperValue> {
 		let command = Command::Policy(policy);
 		self.process(&command)
 	}
@@ -317,7 +323,7 @@ impl PaperClient {
 		self.process_stats(&Command::Stats)
 	}
 
-	fn process(&mut self, command: &Command<'_>) -> PaperClientResult<Buffer> {
+	fn process(&mut self, command: &Command<'_>) -> PaperClientResult<PaperValue> {
 		match self.send(command).and_then(|_| self.receive(command)) {
 			Ok(response) => {
 				self.reconnect_attempts = 0;
@@ -394,7 +400,7 @@ impl PaperClient {
 			})
 	}
 
-	fn receive(&mut self, command: &Command<'_>) -> PaperClientResult<Buffer> {
+	fn receive(&mut self, command: &Command<'_>) -> PaperClientResult<PaperValue> {
 		command.parse_buf_stream(&mut self.stream)
 	}
 

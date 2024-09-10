@@ -13,8 +13,9 @@ pub use crate::policy::*;
 pub mod stats;
 pub use crate::stats::*;
 
-mod arg;
-pub use crate::arg::FromPaperValue;
+mod value;
+pub use crate::value::*;
 
+mod arg;
 mod addr;
 mod command;
