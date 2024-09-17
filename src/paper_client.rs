@@ -15,6 +15,7 @@ const RECONNECT_MAX_ATTEMPTS: u8 = 3;
 
 pub type PaperClientResult<T> = Result<T, PaperClientError>;
 
+#[derive(Debug)]
 pub struct PaperClient {
 	addr: String,
 

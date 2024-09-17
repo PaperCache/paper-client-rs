@@ -11,7 +11,7 @@ use crate::{
 	addr::FromPaperAddr,
 };
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct PaperPool {
 	clients: Arc<Box<[Arc<Mutex<PaperClient>>]>>,
 	index: Arc<AtomicUsize>,
