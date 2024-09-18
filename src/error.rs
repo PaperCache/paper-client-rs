@@ -1,31 +1,110 @@
 use thiserror::Error;
+use paper_utils::stream::StreamReader;
 
 #[derive(Debug, PartialEq, Error)]
 pub enum PaperClientError {
-	#[error("Invalid PaperCache address.")]
+	#[error(transparent)]
+	ServerError(#[from] PaperServerError),
+
+	#[error(transparent)]
+	CacheError(#[from] PaperCacheError),
+
+	#[error("invalid PaperCache address")]
 	InvalidAddress,
 
-	#[error("Could not connect to PaperServer.")]
+	#[error("could not connect to PaperServer")]
 	UnreachableServer,
 
-	#[error("Could not send command to PaperServer.")]
+	#[error("could not send command to PaperServer")]
 	InvalidCommand,
 
-	#[error("Could not parse supplied value as PaperValue.")]
+	#[error("could not parse supplied value as PaperValue")]
 	InvalidValue,
 
-	#[error("Could not receive response from PaperServer.")]
+	#[error("could not receive response from PaperServer")]
 	InvalidResponse,
 
-	#[error("Connection was rejected by PaperServer.")]
-	Rejected,
-
-	#[error("An internal error occured.")]
+	#[error("an internal error occurred")]
 	Internal,
 
-	#[error("Disconnected from PaperServer.")]
+	#[error("disconnected from PaperServer")]
 	Disconnected,
+}
 
-	#[error("{0}")]
-	CacheError(String),
+#[derive(Debug, PartialEq, Error)]
+pub enum PaperCacheError {
+	#[error("an internal error occurred")]
+	Internal,
+
+	#[error("the key was not found in the cache")]
+	KeyNotFound,
+
+	#[error("the value size cannot be zero")]
+	ZeroValueSize,
+
+	#[error("the value size cannot exceed the cache size")]
+	ExceedingValueSize,
+
+	#[error("the cache size cannot be zero")]
+	ZeroCacheSize,
+}
+
+#[derive(Debug, PartialEq, Error)]
+pub enum PaperServerError {
+	#[error("an internal error occurred")]
+	Internal,
+
+	#[error("the maximum number of connections was exceeded")]
+	MaxConnectionsExceeded,
+
+	#[error("unauthorized")]
+	Unauthorized,
+}
+
+impl PaperClientError {
+	pub fn from_stream(mut reader: StreamReader) -> Self {
+		let Ok(code) = reader.read_u8() else {
+			return PaperClientError::InvalidResponse;
+		};
+
+		if code == 0 {
+			let Ok(cache_code) = reader.read_u8() else {
+				return PaperClientError::InvalidResponse;
+			};
+
+			let cache_error = PaperCacheError::from_code(cache_code);
+
+			return PaperClientError::CacheError(cache_error);
+		}
+
+		let server_error = PaperServerError::from_code(code);
+
+		PaperClientError::ServerError(server_error)
+	}
+}
+
+impl PaperServerError {
+	fn from_code(code: u8) -> Self {
+		match code {
+			2 => PaperServerError::MaxConnectionsExceeded,
+			3 => PaperServerError::Unauthorized,
+
+			_ => PaperServerError::Internal,
+		}
+	}
+}
+
+impl PaperCacheError {
+	fn from_code(code: u8) -> Self {
+		match code {
+			1 => PaperCacheError::KeyNotFound,
+
+			2 => PaperCacheError::ZeroValueSize,
+			3 => PaperCacheError::ExceedingValueSize,
+
+			4 => PaperCacheError::ZeroCacheSize,
+
+			_ => PaperCacheError::Internal,
+		}
+	}
 }

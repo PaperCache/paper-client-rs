@@ -2,7 +2,7 @@ pub mod paper_client;
 pub use crate::paper_client::*;
 
 pub mod error;
-pub use crate::error::*;
+pub use error::PaperClientError;
 
 pub mod paper_pool;
 pub use crate::paper_pool::*;
