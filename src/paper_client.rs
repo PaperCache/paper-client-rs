@@ -99,7 +99,7 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("paper://127.0.0.1:3145").unwrap();
 	///
 	/// match client.auth("my_token") {
-	///     Ok(value) => println!("{value:?}"),
+	///     Ok(_) => println!("done"),
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
@@ -141,7 +141,7 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("paper://127.0.0.1:3145").unwrap();
 	///
 	/// match client.set("key", "value", None) {
-	///     Ok(value) => println!("{value:?}"),
+	///     Ok(_) => println!("done"),
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
@@ -173,7 +173,7 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("paper://127.0.0.1:3145").unwrap();
 	///
 	/// match client.del("key") {
-	///     Ok(value) => println!("{value:?}"),
+	///     Ok(_) => println!("done"),
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
@@ -229,7 +229,7 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("paper://127.0.0.1:3145").unwrap();
 	///
 	/// match client.ttl("key", Some(5)) {
-	///     Ok(value) => println!("{value:?}"),
+	///     Ok(_) => println!("done"),
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
@@ -265,7 +265,7 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("paper://127.0.0.1:3145").unwrap();
 	///
 	/// match client.wipe() {
-	///     Ok(value) => println!("{value:?}"),
+	///     Ok(_) => println!("done"),
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
@@ -282,7 +282,7 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("paper://127.0.0.1:3145").unwrap();
 	///
 	/// match client.resize(10) {
-	///     Ok(value) => println!("{value:?}"),
+	///     Ok(_) => println!("done"),
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
@@ -300,7 +300,7 @@ impl PaperClient {
 	/// let mut client = PaperClient::new("paper://127.0.0.1:3145").unwrap();
 	///
 	/// match client.policy(Policy::Lru) {
-	///     Ok(value) => println!("{value:?}"),
+	///     Ok(_) => println!("done"),
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```

@@ -12,21 +12,11 @@ fn policy() {
 	let result = client.policy(INITIAL_POLICY);
 	assert!(result.is_ok());
 
-	let value: String = result.unwrap()
-		.try_into().unwrap();
-
-	assert_eq!(value, "done");
-
 	let policy = get_cache_policy(&mut client);
 	assert_eq!(policy, INITIAL_POLICY);
 
 	let updated = client.policy(UPDATED_POLICY);
 	assert!(updated.is_ok());
-
-	let value: String = updated.unwrap()
-		.try_into().unwrap();
-
-	assert_eq!(value, "done");
 
 	let policy = get_cache_policy(&mut client);
 	assert_eq!(policy, UPDATED_POLICY);

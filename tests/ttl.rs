@@ -11,11 +11,6 @@ fn ttl_existent() {
 
 	let result = client.ttl("key", Some(1));
 	assert!(result.is_ok());
-
-	let value: String = result.unwrap()
-		.try_into().unwrap();
-
-	assert_eq!(value, "done");
 }
 
 #[test]

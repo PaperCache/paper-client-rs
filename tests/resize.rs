@@ -12,21 +12,11 @@ fn resize() {
 	let result = client.resize(INITIAL_SIZE);
 	assert!(result.is_ok());
 
-	let value: String = result.unwrap()
-		.try_into().unwrap();
-
-	assert_eq!(value, "done");
-
 	let size = get_cache_size(&mut client);
 	assert_eq!(size, INITIAL_SIZE);
 
 	let updated = client.resize(UPDATED_SIZE);
 	assert!(updated.is_ok());
-
-	let value: String = updated.unwrap()
-		.try_into().unwrap();
-
-	assert_eq!(value, "done");
 
 	let size = get_cache_size(&mut client);
 	assert_eq!(size, UPDATED_SIZE);

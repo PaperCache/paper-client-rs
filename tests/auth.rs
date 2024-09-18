@@ -14,9 +14,4 @@ fn auth_correct() {
 
 	let result = client.auth("auth_token");
 	assert!(result.is_ok());
-
-	let value: String = result.unwrap()
-		.try_into().unwrap();
-
-	assert_eq!(value, "done");
 }

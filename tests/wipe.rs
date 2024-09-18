@@ -10,11 +10,6 @@ fn wipe() {
 	let result = client.wipe();
 	assert!(result.is_ok());
 
-	let value: String = result.unwrap()
-		.try_into().unwrap();
-
-	assert_eq!(value, "done");
-
 	let got = client.get("key");
 	assert!(got.is_err());
 }
