@@ -44,27 +44,27 @@ impl<'a> Command<'a> {
 			Command::Ping => {
 				SheetBuilder::new()
 					.write_u8(CommandByte::PING)
-					.to_sheet()
+					.into_sheet()
 			},
 
 			Command::Version => {
 				SheetBuilder::new()
 					.write_u8(CommandByte::VERSION)
-					.to_sheet()
+					.into_sheet()
 			},
 
 			Command::Auth(token) => {
 				SheetBuilder::new()
 					.write_u8(CommandByte::AUTH)
 					.write_str(token)
-					.to_sheet()
+					.into_sheet()
 			},
 
 			Command::Get(key) => {
 				SheetBuilder::new()
 					.write_u8(CommandByte::GET)
 					.write_str(key)
-					.to_sheet()
+					.into_sheet()
 			},
 
 			Command::Set(key, value, ttl) => {
@@ -73,28 +73,28 @@ impl<'a> Command<'a> {
 					.write_str(key)
 					.write_buf(value.into())
 					.write_u32(*ttl)
-					.to_sheet()
+					.into_sheet()
 			},
 
 			Command::Del(key) => {
 				SheetBuilder::new()
 					.write_u8(CommandByte::DEL)
 					.write_str(key)
-					.to_sheet()
+					.into_sheet()
 			},
 
 			Command::Has(key) => {
 				SheetBuilder::new()
 					.write_u8(CommandByte::HAS)
 					.write_str(key)
-					.to_sheet()
+					.into_sheet()
 			},
 
 			Command::Peek(key) => {
 				SheetBuilder::new()
 					.write_u8(CommandByte::PEEK)
 					.write_str(key)
-					.to_sheet()
+					.into_sheet()
 			},
 
 			Command::Ttl(key, ttl) => {
@@ -102,27 +102,27 @@ impl<'a> Command<'a> {
 					.write_u8(CommandByte::TTL)
 					.write_str(key)
 					.write_u32(*ttl)
-					.to_sheet()
+					.into_sheet()
 			},
 
 			Command::Size(key) => {
 				SheetBuilder::new()
 					.write_u8(CommandByte::SIZE)
 					.write_str(key)
-					.to_sheet()
+					.into_sheet()
 			},
 
 			Command::Wipe => {
 				SheetBuilder::new()
 					.write_u8(CommandByte::WIPE)
-					.to_sheet()
+					.into_sheet()
 			},
 
 			Command::Resize(size) => {
 				SheetBuilder::new()
 					.write_u8(CommandByte::RESIZE)
 					.write_u64(*size)
-					.to_sheet()
+					.into_sheet()
 			},
 
 			Command::Policy(policy) => {
@@ -136,17 +136,17 @@ impl<'a> Command<'a> {
 				SheetBuilder::new()
 					.write_u8(CommandByte::POLICY)
 					.write_u8(byte)
-					.to_sheet()
+					.into_sheet()
 			},
 
 			Command::Stats => {
 				SheetBuilder::new()
 					.write_u8(CommandByte::STATS)
-					.to_sheet()
+					.into_sheet()
 			},
 		};
 
-		sheet.to_stream(stream)
+		sheet.write_to_stream(stream)
 	}
 
 	pub fn parse_stream(&self, stream: &mut TcpStream) -> PaperClientResult<()> {
