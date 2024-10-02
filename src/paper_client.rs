@@ -251,7 +251,7 @@ impl PaperClient {
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
-	pub fn size(&mut self, key: impl AsPaperKey) -> PaperClientResult<u64> {
+	pub fn size(&mut self, key: impl AsPaperKey) -> PaperClientResult<u32> {
 		let command = Command::Size(key.as_paper_key());
 		self.process_size(&command)
 	}
@@ -377,7 +377,7 @@ impl PaperClient {
 		}
 	}
 
-	fn process_size(&mut self, command: &Command<'_>) -> PaperClientResult<u64> {
+	fn process_size(&mut self, command: &Command<'_>) -> PaperClientResult<u32> {
 		match self.send(command).and_then(|_| self.receive_size(command)) {
 			Ok(response) => {
 				self.reconnect_attempts = 0;
@@ -432,7 +432,7 @@ impl PaperClient {
 		command.parse_has_stream(&mut self.stream)
 	}
 
-	fn receive_size(&mut self, command: &Command<'_>) -> PaperClientResult<u64> {
+	fn receive_size(&mut self, command: &Command<'_>) -> PaperClientResult<u32> {
 		command.parse_size_stream(&mut self.stream)
 	}
 

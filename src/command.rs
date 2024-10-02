@@ -202,7 +202,7 @@ impl<'a> Command<'a> {
 		}
 	}
 
-	pub fn parse_size_stream(&self, stream: &mut TcpStream) -> PaperClientResult<u64> {
+	pub fn parse_size_stream(&self, stream: &mut TcpStream) -> PaperClientResult<u32> {
 		let mut reader = StreamReader::new(stream);
 
 		let is_ok = reader
@@ -212,7 +212,7 @@ impl<'a> Command<'a> {
 		match is_ok {
 			true => {
 				let size = reader
-					.read_u64()
+					.read_u32()
 					.map_err(|_| PaperClientError::InvalidResponse)?;
 
 				Ok(size)
