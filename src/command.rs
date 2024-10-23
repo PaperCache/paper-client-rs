@@ -38,7 +38,7 @@ pub enum Command<'a> {
 	Stats,
 }
 
-impl<'a> Command<'a> {
+impl Command<'_> {
 	pub fn to_stream(&self, stream: &mut TcpStream) -> Result<(), StreamError> {
 		let sheet = match self {
 			Command::Ping => {

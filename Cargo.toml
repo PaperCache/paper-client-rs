@@ -1,12 +1,12 @@
 [package]
 name = "paper_client"
-version = "2.5.2"
+version = "1.5.2"
 edition = "2021"
 
 [dependencies]
 paper_utils = { git = "ssh://git@github.com/Paper-Book/paper-utils.git", tag = "v1.2.1" }
-kwik = { git = "https://github.com/KiaShakiba/kwik.git", tag = "v1.9.5" }
-thiserror = "1.0.63"
+kwik = { git = "https://github.com/KiaShakiba/kwik.git", tag = "v1.11.6" }
+thiserror = "1.0.65"
 
 [dev-dependencies]
 serial_test = "3.1.1"
