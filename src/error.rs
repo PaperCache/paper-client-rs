@@ -47,6 +47,12 @@ pub enum PaperCacheError {
 
 	#[error("the cache size cannot be zero")]
 	ZeroCacheSize,
+
+	#[error("unconfigured the policy")]
+	UnconfiguredPolicy,
+
+	#[error("invalid policy")]
+	InvalidPolicy,
 }
 
 #[derive(Debug, PartialEq, Error)]
@@ -103,6 +109,9 @@ impl PaperCacheError {
 			3 => PaperCacheError::ExceedingValueSize,
 
 			4 => PaperCacheError::ZeroCacheSize,
+
+			6 => PaperCacheError::UnconfiguredPolicy,
+			7 => PaperCacheError::InvalidPolicy,
 
 			_ => PaperCacheError::Internal,
 		}

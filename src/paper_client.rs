@@ -7,7 +7,7 @@ use crate::{
 	arg::{AsPaperKey, AsPaperAuthToken},
 	value::PaperValue,
 	command::Command,
-	policy::Policy,
+	policy::PaperPolicy,
 	stats::Stats,
 };
 
@@ -295,16 +295,16 @@ impl PaperClient {
 	///
 	/// # Examples
 	/// ```
-	/// use paper_client::{PaperClient, Policy};
+	/// use paper_client::{PaperClient, PaperPolicy};
 	///
 	/// let mut client = PaperClient::new("paper://127.0.0.1:3145").unwrap();
 	///
-	/// match client.policy(Policy::Lru) {
+	/// match client.policy(PaperPolicy::Lru) {
 	///     Ok(_) => println!("done"),
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
-	pub fn policy(&mut self, policy: Policy) -> PaperClientResult<()> {
+	pub fn policy(&mut self, policy: PaperPolicy) -> PaperClientResult<()> {
 		let command = Command::Policy(policy);
 		self.process(&command)
 	}

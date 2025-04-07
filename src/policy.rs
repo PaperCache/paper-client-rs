@@ -1,32 +1,67 @@
-use paper_utils::policy::PolicyByte;
+use std::{
+	fmt::{self, Display},
+	str::FromStr,
+};
+
 use crate::error::PaperClientError;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Policy {
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum PaperPolicy {
 	Lfu,
 	Fifo,
 	Lru,
 	Mru,
+	TwoQ(f64, f64),
 }
 
-impl Policy {
-	pub fn id(&self) -> String {
+impl Display for PaperPolicy {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		match self {
-			Policy::Lfu => "lfu".to_owned(),
-			Policy::Fifo => "fifo".to_owned(),
-			Policy::Lru => "lru".to_owned(),
-			Policy::Mru => "mru".to_owned(),
+			PaperPolicy::Lfu => write!(f, "lfu"),
+			PaperPolicy::Fifo => write!(f, "fifo"),
+			PaperPolicy::Lru => write!(f, "lru"),
+			PaperPolicy::Mru => write!(f, "mru"),
+			PaperPolicy::TwoQ(k_in, k_out) => write!(f, "2q-{k_in}-{k_out}"),
 		}
 	}
+}
 
-	pub fn from_byte(byte: u8) -> Result<Self, PaperClientError> {
-		match byte {
-			PolicyByte::LFU => Ok(Policy::Lfu),
-			PolicyByte::FIFO => Ok(Policy::Fifo),
-			PolicyByte::LRU => Ok(Policy::Lru),
-			PolicyByte::MRU => Ok(Policy::Mru),
+impl FromStr for PaperPolicy {
+	type Err = PaperClientError;
 
-			_ => Err(PaperClientError::Internal),
-		}
+	fn from_str(value: &str) -> Result<Self, Self::Err> {
+		let policy = match value {
+			"lfu" => PaperPolicy::Lfu,
+			"fifo" => PaperPolicy::Fifo,
+			"lru" => PaperPolicy::Lru,
+			"mru" => PaperPolicy::Mru,
+
+			value if value.starts_with("2q-") => parse_two_q(value)?,
+
+			_ => return Err(PaperClientError::Internal),
+		};
+
+		Ok(policy)
 	}
+}
+
+fn parse_two_q(value: &str) -> Result<PaperPolicy, PaperClientError> {
+	// skip the "2q"
+	let tokens = value[3..]
+		.split('-')
+		.collect::<Vec<&str>>();
+
+	if tokens.len() != 2 {
+		return Err(PaperClientError::Internal);
+	}
+
+	let Ok(k_in) = tokens[0].parse::<f64>() else {
+		return Err(PaperClientError::Internal);
+	};
+
+	let Ok(k_out) = tokens[1].parse::<f64>() else {
+		return Err(PaperClientError::Internal);
+	};
+
+	Ok(PaperPolicy::TwoQ(k_in, k_out))
 }

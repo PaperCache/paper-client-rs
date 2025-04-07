@@ -1,9 +1,9 @@
 mod common;
 
-use paper_client::{PaperClient, Policy};
+use paper_client::{PaperClient, PaperPolicy};
 
-const INITIAL_POLICY: Policy = Policy::Lfu;
-const UPDATED_POLICY: Policy = Policy::Fifo;
+const INITIAL_POLICY: PaperPolicy = PaperPolicy::Lfu;
+const UPDATED_POLICY: PaperPolicy = PaperPolicy::Fifo;
 
 #[test]
 fn policy() {
@@ -22,7 +22,7 @@ fn policy() {
 	assert_eq!(policy, UPDATED_POLICY);
 }
 
-fn get_cache_policy(client: &mut PaperClient) -> Policy {
+fn get_cache_policy(client: &mut PaperClient) -> PaperPolicy {
 	let stats = client
 		.stats()
 		.expect("Could not get cache size.");

@@ -1,17 +1,19 @@
-use std::net::TcpStream;
+use std::{
+	str::FromStr,
+	net::TcpStream,
+};
 
 use paper_utils::{
 	sheet::SheetBuilder,
 	stream::{StreamReader, StreamError},
 	command::CommandByte,
-	policy::PolicyByte,
 };
 
 use crate::{
 	paper_client::PaperClientResult,
 	error::PaperClientError,
 	value::PaperValue,
-	policy::Policy,
+	policy::PaperPolicy,
 	stats::Stats,
 };
 
@@ -33,7 +35,7 @@ pub enum Command<'a> {
 	Wipe,
 
 	Resize(u64),
-	Policy(Policy),
+	Policy(PaperPolicy),
 
 	Stats,
 }
@@ -126,16 +128,9 @@ impl Command<'_> {
 			},
 
 			Command::Policy(policy) => {
-				let byte: u8 = match policy {
-					Policy::Lfu => PolicyByte::LFU,
-					Policy::Fifo => PolicyByte::FIFO,
-					Policy::Lru => PolicyByte::LRU,
-					Policy::Mru => PolicyByte::MRU,
-				};
-
 				SheetBuilder::new()
 					.write_u8(CommandByte::POLICY)
-					.write_u8(byte)
+					.write_str(&policy.to_string())
 					.into_sheet()
 			},
 
@@ -240,10 +235,10 @@ impl Command<'_> {
 
 				let miss_ratio = reader.read_f64().map_err(|_| PaperClientError::InvalidResponse)?;
 
-				let policy_byte = reader.read_u8().map_err(|_| PaperClientError::InvalidResponse)?;
+				let policy_str = reader.read_string().map_err(|_| PaperClientError::InvalidResponse)?;
 				let uptime = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
 
-				let policy = Policy::from_byte(policy_byte)
+				let policy = PaperPolicy::from_str(&policy_str)
 					.map_err(|_| PaperClientError::InvalidResponse)?;
 
 				let stats = Stats::new(
