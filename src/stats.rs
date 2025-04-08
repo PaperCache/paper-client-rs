@@ -12,6 +12,8 @@ pub struct Stats {
 	miss_ratio: f64,
 
 	policy: PaperPolicy,
+	is_auto_policy: bool,
+
 	uptime: u64,
 }
 
@@ -22,7 +24,7 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(0, 0, 0, 0, 0, 0.0, PaperPolicy::Lru, 0);
+	/// let stats = Stats::new(0, 0, 0, 0, 0, 0.0, PaperPolicy::Lru, false, 0);
 	/// ```
 	#[allow(clippy::too_many_arguments)]
 	pub fn new(
@@ -36,6 +38,8 @@ impl Stats {
 		miss_ratio: f64,
 
 		policy: PaperPolicy,
+		is_auto_policy: bool,
+
 		uptime: u64,
 	) -> Self {
 		Stats {
@@ -49,6 +53,8 @@ impl Stats {
 			miss_ratio,
 
 			policy,
+			is_auto_policy,
+
 			uptime,
 		}
 	}
@@ -59,7 +65,7 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(1000, 0, 0, 0, 0, 0.0, PaperPolicy::Lru, 0);
+	/// let stats = Stats::new(1000, 0, 0, 0, 0, 0.0, PaperPolicy::Lru, false, 0);
 	///
 	/// assert_eq!(stats.get_max_size(), 1000);
 	/// ```
@@ -73,7 +79,7 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(1000, 500, 0, 0, 0, 0.0, PaperPolicy::Lru, 0);
+	/// let stats = Stats::new(1000, 500, 0, 0, 0, 0.0, PaperPolicy::Lru, false, 0);
 	///
 	/// assert_eq!(stats.get_used_size(), 500);
 	/// ```
@@ -87,7 +93,7 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(0, 0, 10, 0, 0, 0.0, PaperPolicy::Lru, 0);
+	/// let stats = Stats::new(0, 0, 10, 0, 0, 0.0, PaperPolicy::Lru, false, 0);
 	///
 	/// assert_eq!(stats.get_total_gets(), 10);
 	/// ```
@@ -101,7 +107,7 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(0, 0, 0, 10, 0, 0.0, PaperPolicy::Lru, 0);
+	/// let stats = Stats::new(0, 0, 0, 10, 0, 0.0, PaperPolicy::Lru, false, 0);
 	///
 	/// assert_eq!(stats.get_total_sets(), 10);
 	/// ```
@@ -115,7 +121,7 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(0, 0, 0, 0, 10, 0.0, PaperPolicy::Lru, 0);
+	/// let stats = Stats::new(0, 0, 0, 0, 10, 0.0, PaperPolicy::Lru, false, 0);
 	///
 	/// assert_eq!(stats.get_total_dels(), 10);
 	/// ```
@@ -129,7 +135,7 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(0, 0, 0, 0, 0, 1.0, PaperPolicy::Lru, 0);
+	/// let stats = Stats::new(0, 0, 0, 0, 0, 1.0, PaperPolicy::Lru, false, 0);
 	///
 	/// assert_eq!(stats.get_miss_ratio(), 1.0);
 	/// ```
@@ -143,12 +149,27 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(0, 0, 0, 0, 0, 0.0, PaperPolicy::Lru, 0);
+	/// let stats = Stats::new(0, 0, 0, 0, 0, 0.0, PaperPolicy::Lru, false, 0);
 	///
 	/// assert_eq!(stats.get_policy(), &PaperPolicy::Lru);
 	/// ```
 	pub fn get_policy(&self) -> &PaperPolicy {
 		&self.policy
+	}
+
+	/// Returns `true` if the cache is configured to the [`PaperPolicy::Auto`]
+	/// eviction policy.
+	///
+	/// # Examples
+	/// ```
+	/// use paper_client::{Stats, PaperPolicy};
+	///
+	/// let stats = Stats::new(0, 0, 0, 0, 0, 0.0, PaperPolicy::Lru, true, 0);
+	///
+	/// assert!(stats.is_auto_policy());
+	/// ```
+	pub fn is_auto_policy(&self) -> bool {
+		self.is_auto_policy
 	}
 
 	/// Returns the cache's uptime.
@@ -157,7 +178,7 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(0, 0, 0, 0, 0, 0.0, PaperPolicy::Lru, 1);
+	/// let stats = Stats::new(0, 0, 0, 0, 0, 0.0, PaperPolicy::Lru, false, 1);
 	///
 	/// assert_eq!(stats.get_uptime(), 1);
 	/// ```

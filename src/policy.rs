@@ -7,6 +7,7 @@ use crate::error::PaperClientError;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum PaperPolicy {
+	Auto,
 	Lfu,
 	Fifo,
 	Lru,
@@ -17,6 +18,7 @@ pub enum PaperPolicy {
 impl Display for PaperPolicy {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		match self {
+			PaperPolicy::Auto => write!(f, "auto"),
 			PaperPolicy::Lfu => write!(f, "lfu"),
 			PaperPolicy::Fifo => write!(f, "fifo"),
 			PaperPolicy::Lru => write!(f, "lru"),
@@ -31,6 +33,8 @@ impl FromStr for PaperPolicy {
 
 	fn from_str(value: &str) -> Result<Self, Self::Err> {
 		let policy = match value {
+			"auto" => PaperPolicy::Auto,
+
 			"lfu" => PaperPolicy::Lfu,
 			"fifo" => PaperPolicy::Fifo,
 			"lru" => PaperPolicy::Lru,

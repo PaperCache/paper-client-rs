@@ -236,6 +236,8 @@ impl Command<'_> {
 				let miss_ratio = reader.read_f64().map_err(|_| PaperClientError::InvalidResponse)?;
 
 				let policy_str = reader.read_string().map_err(|_| PaperClientError::InvalidResponse)?;
+				let is_auto_policy = reader.read_bool().map_err(|_| PaperClientError::InvalidResponse)?;
+
 				let uptime = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
 
 				let policy = PaperPolicy::from_str(&policy_str)
@@ -252,6 +254,8 @@ impl Command<'_> {
 					miss_ratio,
 
 					policy,
+					is_auto_policy,
+
 					uptime,
 				);
 
