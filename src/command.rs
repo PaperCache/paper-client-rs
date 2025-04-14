@@ -130,7 +130,7 @@ impl Command<'_> {
 			Command::Policy(policy) => {
 				SheetBuilder::new()
 					.write_u8(CommandByte::POLICY)
-					.write_str(&policy.to_string())
+					.write_str(policy.to_string())
 					.into_sheet()
 			},
 
@@ -224,45 +224,45 @@ impl Command<'_> {
 			.read_bool()
 			.map_err(|_| PaperClientError::InvalidResponse)?;
 
-		match is_ok {
-			true => {
-				let max_size = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
-				let used_size = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
+		if is_ok {
+			let max_size = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
+			let used_size = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
+			let num_objects = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
 
-				let total_gets = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
-				let total_sets = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
-				let total_dels = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
+			let total_gets = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
+			let total_sets = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
+			let total_dels = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
 
-				let miss_ratio = reader.read_f64().map_err(|_| PaperClientError::InvalidResponse)?;
+			let miss_ratio = reader.read_f64().map_err(|_| PaperClientError::InvalidResponse)?;
 
-				let policy_str = reader.read_string().map_err(|_| PaperClientError::InvalidResponse)?;
-				let is_auto_policy = reader.read_bool().map_err(|_| PaperClientError::InvalidResponse)?;
+			let policy_str = reader.read_string().map_err(|_| PaperClientError::InvalidResponse)?;
+			let is_auto_policy = reader.read_bool().map_err(|_| PaperClientError::InvalidResponse)?;
 
-				let uptime = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
+			let uptime = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
 
-				let policy = PaperPolicy::from_str(&policy_str)
-					.map_err(|_| PaperClientError::InvalidResponse)?;
+			let policy = PaperPolicy::from_str(&policy_str)
+				.map_err(|_| PaperClientError::InvalidResponse)?;
 
-				let stats = Stats::new(
-					max_size,
-					used_size,
+			let stats = Stats::new(
+				max_size,
+				used_size,
+				num_objects,
 
-					total_gets,
-					total_sets,
-					total_dels,
+				total_gets,
+				total_sets,
+				total_dels,
 
-					miss_ratio,
+				miss_ratio,
 
-					policy,
-					is_auto_policy,
+				policy,
+				is_auto_policy,
 
-					uptime,
-				);
+				uptime,
+			);
 
-				Ok(stats)
-			},
-
-			false => Err(PaperClientError::from_stream(reader)),
+			Ok(stats)
+		} else {
+			Err(PaperClientError::from_stream(reader))
 		}
 	}
 }

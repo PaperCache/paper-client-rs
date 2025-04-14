@@ -4,6 +4,7 @@ use crate::policy::PaperPolicy;
 pub struct Stats {
 	max_size: u64,
 	used_size: u64,
+	num_objects: u64,
 
 	total_gets: u64,
 	total_sets: u64,
@@ -24,12 +25,13 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(0, 0, 0, 0, 0, 0.0, PaperPolicy::Lru, false, 0);
+	/// let stats = Stats::new(0, 0, 0, 0, 0, 0, 0.0, PaperPolicy::Lru, false, 0);
 	/// ```
 	#[allow(clippy::too_many_arguments)]
 	pub fn new(
 		max_size: u64,
 		used_size: u64,
+		num_objects: u64,
 
 		total_gets: u64,
 		total_sets: u64,
@@ -45,6 +47,7 @@ impl Stats {
 		Stats {
 			max_size,
 			used_size,
+			num_objects,
 
 			total_gets,
 			total_sets,
@@ -65,7 +68,7 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(1000, 0, 0, 0, 0, 0.0, PaperPolicy::Lru, false, 0);
+	/// let stats = Stats::new(1000, 0, 0, 0, 0, 0, 0.0, PaperPolicy::Lru, false, 0);
 	///
 	/// assert_eq!(stats.get_max_size(), 1000);
 	/// ```
@@ -79,12 +82,26 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(1000, 500, 0, 0, 0, 0.0, PaperPolicy::Lru, false, 0);
+	/// let stats = Stats::new(1000, 500, 0, 0, 0, 0, 0.0, PaperPolicy::Lru, false, 0);
 	///
 	/// assert_eq!(stats.get_used_size(), 500);
 	/// ```
 	pub fn get_used_size(&self) -> u64 {
 		self.used_size
+	}
+
+	/// Returns the number of objects in the cache.
+	///
+	/// # Examples
+	/// ```
+	/// use paper_client::{Stats, PaperPolicy};
+	///
+	/// let stats = Stats::new(1000, 500, 10, 0, 0, 0, 0.0, PaperPolicy::Lru, false, 0);
+	///
+	/// assert_eq!(stats.get_num_objects(), 10);
+	/// ```
+	pub fn get_num_objects(&self) -> u64 {
+		self.num_objects
 	}
 
 	/// Returns the cache's total number of gets.
@@ -93,7 +110,7 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(0, 0, 10, 0, 0, 0.0, PaperPolicy::Lru, false, 0);
+	/// let stats = Stats::new(0, 0, 0, 10, 0, 0, 0.0, PaperPolicy::Lru, false, 0);
 	///
 	/// assert_eq!(stats.get_total_gets(), 10);
 	/// ```
@@ -107,7 +124,7 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(0, 0, 0, 10, 0, 0.0, PaperPolicy::Lru, false, 0);
+	/// let stats = Stats::new(0, 0, 0, 0, 10, 0, 0.0, PaperPolicy::Lru, false, 0);
 	///
 	/// assert_eq!(stats.get_total_sets(), 10);
 	/// ```
@@ -121,7 +138,7 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(0, 0, 0, 0, 10, 0.0, PaperPolicy::Lru, false, 0);
+	/// let stats = Stats::new(0, 0, 0, 0, 0, 10, 0.0, PaperPolicy::Lru, false, 0);
 	///
 	/// assert_eq!(stats.get_total_dels(), 10);
 	/// ```
@@ -135,7 +152,7 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(0, 0, 0, 0, 0, 1.0, PaperPolicy::Lru, false, 0);
+	/// let stats = Stats::new(0, 0, 0, 0, 0, 0, 1.0, PaperPolicy::Lru, false, 0);
 	///
 	/// assert_eq!(stats.get_miss_ratio(), 1.0);
 	/// ```
@@ -149,7 +166,7 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(0, 0, 0, 0, 0, 0.0, PaperPolicy::Lru, false, 0);
+	/// let stats = Stats::new(0, 0, 0, 0, 0, 0, 0.0, PaperPolicy::Lru, false, 0);
 	///
 	/// assert_eq!(stats.get_policy(), &PaperPolicy::Lru);
 	/// ```
@@ -164,7 +181,7 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(0, 0, 0, 0, 0, 0.0, PaperPolicy::Lru, true, 0);
+	/// let stats = Stats::new(0, 0, 0, 0, 0, 0, 0.0, PaperPolicy::Lru, true, 0);
 	///
 	/// assert!(stats.is_auto_policy());
 	/// ```
@@ -178,7 +195,7 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(0, 0, 0, 0, 0, 0.0, PaperPolicy::Lru, false, 1);
+	/// let stats = Stats::new(0, 0, 0, 0, 0, 0, 0.0, PaperPolicy::Lru, false, 1);
 	///
 	/// assert_eq!(stats.get_uptime(), 1);
 	/// ```

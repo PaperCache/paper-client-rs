@@ -48,7 +48,7 @@ pub enum PaperCacheError {
 	#[error("the cache size cannot be zero")]
 	ZeroCacheSize,
 
-	#[error("unconfigured the policy")]
+	#[error("unconfigured policy")]
 	UnconfiguredPolicy,
 
 	#[error("invalid policy")]
