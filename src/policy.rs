@@ -11,9 +11,11 @@ pub enum PaperPolicy {
 	Lfu,
 	Fifo,
 	Clock,
+	Sieve,
 	Lru,
 	Mru,
 	TwoQ(f64, f64),
+	SThreeFifo(f64),
 }
 
 impl Display for PaperPolicy {
@@ -23,9 +25,11 @@ impl Display for PaperPolicy {
 			PaperPolicy::Lfu => write!(f, "lfu"),
 			PaperPolicy::Fifo => write!(f, "fifo"),
 			PaperPolicy::Clock => write!(f, "clock"),
+			PaperPolicy::Sieve => write!(f, "sieve"),
 			PaperPolicy::Lru => write!(f, "lru"),
 			PaperPolicy::Mru => write!(f, "mru"),
 			PaperPolicy::TwoQ(k_in, k_out) => write!(f, "2q-{k_in}-{k_out}"),
+			PaperPolicy::SThreeFifo(ratio) => write!(f, "s3-fifo-{ratio}"),
 		}
 	}
 }
@@ -40,10 +44,12 @@ impl FromStr for PaperPolicy {
 			"lfu" => PaperPolicy::Lfu,
 			"fifo" => PaperPolicy::Fifo,
 			"clock" => PaperPolicy::Clock,
+			"sieve" => PaperPolicy::Sieve,
 			"lru" => PaperPolicy::Lru,
 			"mru" => PaperPolicy::Mru,
 
 			value if value.starts_with("2q-") => parse_two_q(value)?,
+			value if value.starts_with("s3-fifo-") => parse_s_three_fifo(value)?,
 
 			_ => return Err(PaperClientError::Internal),
 		};
@@ -53,7 +59,7 @@ impl FromStr for PaperPolicy {
 }
 
 fn parse_two_q(value: &str) -> Result<PaperPolicy, PaperClientError> {
-	// skip the "2q"
+	// skip the "2q-"
 	let tokens = value[3..]
 		.split('-')
 		.collect::<Vec<&str>>();
@@ -71,4 +77,21 @@ fn parse_two_q(value: &str) -> Result<PaperPolicy, PaperClientError> {
 	};
 
 	Ok(PaperPolicy::TwoQ(k_in, k_out))
+}
+
+fn parse_s_three_fifo(value: &str) -> Result<PaperPolicy, PaperClientError> {
+	// skip the "s3-fifo-"
+	let tokens = value[8..]
+		.split('-')
+		.collect::<Vec<&str>>();
+
+	if tokens.len() != 1 {
+		return Err(PaperClientError::Internal);
+	}
+
+	let Ok(ratio) = tokens[0].parse::<f64>() else {
+		return Err(PaperClientError::Internal);
+	};
+
+	Ok(PaperPolicy::SThreeFifo(ratio))
 }
