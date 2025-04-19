@@ -12,6 +12,7 @@ pub struct Stats {
 
 	miss_ratio: f64,
 
+	policies: Vec<PaperPolicy>,
 	policy: PaperPolicy,
 	is_auto_policy: bool,
 
@@ -25,7 +26,7 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(0, 0, 0, 0, 0, 0, 0.0, PaperPolicy::Lru, false, 0);
+	/// let stats = Stats::new(0, 0, 0, 0, 0, 0, 0.0, vec![PaperPolicy::Lru], PaperPolicy::Lru, false, 0);
 	/// ```
 	#[allow(clippy::too_many_arguments)]
 	pub fn new(
@@ -39,6 +40,7 @@ impl Stats {
 
 		miss_ratio: f64,
 
+		policies: Vec<PaperPolicy>,
 		policy: PaperPolicy,
 		is_auto_policy: bool,
 
@@ -55,6 +57,7 @@ impl Stats {
 
 			miss_ratio,
 
+			policies,
 			policy,
 			is_auto_policy,
 
@@ -68,7 +71,7 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(1000, 0, 0, 0, 0, 0, 0.0, PaperPolicy::Lru, false, 0);
+	/// let stats = Stats::new(1000, 0, 0, 0, 0, 0, 0.0, vec![PaperPolicy::Lru], PaperPolicy::Lru, false, 0);
 	///
 	/// assert_eq!(stats.get_max_size(), 1000);
 	/// ```
@@ -82,7 +85,7 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(1000, 500, 0, 0, 0, 0, 0.0, PaperPolicy::Lru, false, 0);
+	/// let stats = Stats::new(1000, 500, 0, 0, 0, 0, 0.0, vec![PaperPolicy::Lru], PaperPolicy::Lru, false, 0);
 	///
 	/// assert_eq!(stats.get_used_size(), 500);
 	/// ```
@@ -96,7 +99,7 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(1000, 500, 10, 0, 0, 0, 0.0, PaperPolicy::Lru, false, 0);
+	/// let stats = Stats::new(1000, 500, 10, 0, 0, 0, 0.0, vec![PaperPolicy::Lru], PaperPolicy::Lru, false, 0);
 	///
 	/// assert_eq!(stats.get_num_objects(), 10);
 	/// ```
@@ -110,7 +113,7 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(0, 0, 0, 10, 0, 0, 0.0, PaperPolicy::Lru, false, 0);
+	/// let stats = Stats::new(0, 0, 0, 10, 0, 0, 0.0, vec![PaperPolicy::Lru], PaperPolicy::Lru, false, 0);
 	///
 	/// assert_eq!(stats.get_total_gets(), 10);
 	/// ```
@@ -124,7 +127,7 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(0, 0, 0, 0, 10, 0, 0.0, PaperPolicy::Lru, false, 0);
+	/// let stats = Stats::new(0, 0, 0, 0, 10, 0, 0.0, vec![PaperPolicy::Lru], PaperPolicy::Lru, false, 0);
 	///
 	/// assert_eq!(stats.get_total_sets(), 10);
 	/// ```
@@ -138,7 +141,7 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(0, 0, 0, 0, 0, 10, 0.0, PaperPolicy::Lru, false, 0);
+	/// let stats = Stats::new(0, 0, 0, 0, 0, 10, 0.0, vec![PaperPolicy::Lru], PaperPolicy::Lru, false, 0);
 	///
 	/// assert_eq!(stats.get_total_dels(), 10);
 	/// ```
@@ -152,12 +155,26 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(0, 0, 0, 0, 0, 0, 1.0, PaperPolicy::Lru, false, 0);
+	/// let stats = Stats::new(0, 0, 0, 0, 0, 0, 1.0, vec![PaperPolicy::Lru], PaperPolicy::Lru, false, 0);
 	///
 	/// assert_eq!(stats.get_miss_ratio(), 1.0);
 	/// ```
 	pub fn get_miss_ratio(&self) -> f64 {
 		self.miss_ratio
+	}
+
+	/// Returns the cache's configured eviction policies.
+	///
+	/// # Examples
+	/// ```
+	/// use paper_client::{Stats, PaperPolicy};
+	///
+	/// let stats = Stats::new(0, 0, 0, 0, 0, 0, 0.0, vec![PaperPolicy::Lru], PaperPolicy::Lru, false, 0);
+	///
+	/// assert_eq!(stats.get_policies(), &[PaperPolicy::Lru]);
+	/// ```
+	pub fn get_policies(&self) -> &[PaperPolicy] {
+		&self.policies
 	}
 
 	/// Returns the cache's eviction policy.
@@ -166,7 +183,7 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(0, 0, 0, 0, 0, 0, 0.0, PaperPolicy::Lru, false, 0);
+	/// let stats = Stats::new(0, 0, 0, 0, 0, 0, 0.0, vec![PaperPolicy::Lru], PaperPolicy::Lru, false, 0);
 	///
 	/// assert_eq!(stats.get_policy(), &PaperPolicy::Lru);
 	/// ```
@@ -181,7 +198,7 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(0, 0, 0, 0, 0, 0, 0.0, PaperPolicy::Lru, true, 0);
+	/// let stats = Stats::new(0, 0, 0, 0, 0, 0, 0.0, vec![PaperPolicy::Lru], PaperPolicy::Lru, true, 0);
 	///
 	/// assert!(stats.is_auto_policy());
 	/// ```
@@ -195,7 +212,7 @@ impl Stats {
 	/// ```
 	/// use paper_client::{Stats, PaperPolicy};
 	///
-	/// let stats = Stats::new(0, 0, 0, 0, 0, 0, 0.0, PaperPolicy::Lru, false, 1);
+	/// let stats = Stats::new(0, 0, 0, 0, 0, 0, 0.0, vec![PaperPolicy::Lru], PaperPolicy::Lru, false, 1);
 	///
 	/// assert_eq!(stats.get_uptime(), 1);
 	/// ```

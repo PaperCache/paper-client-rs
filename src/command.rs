@@ -235,13 +235,21 @@ impl Command<'_> {
 
 			let miss_ratio = reader.read_f64().map_err(|_| PaperClientError::InvalidResponse)?;
 
+			let mut policies = Vec::<PaperPolicy>::new();
+			let num_policies = reader.read_u32().map_err(|_| PaperClientError::InvalidResponse)?;
+
+			for _ in 0..num_policies {
+				let policy_str = reader.read_string().map_err(|_| PaperClientError::InvalidResponse)?;
+				let policy = PaperPolicy::from_str(&policy_str).map_err(|_| PaperClientError::InvalidResponse)?;
+
+				policies.push(policy);
+			}
+
 			let policy_str = reader.read_string().map_err(|_| PaperClientError::InvalidResponse)?;
+			let policy = PaperPolicy::from_str(&policy_str).map_err(|_| PaperClientError::InvalidResponse)?;
 			let is_auto_policy = reader.read_bool().map_err(|_| PaperClientError::InvalidResponse)?;
 
 			let uptime = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
-
-			let policy = PaperPolicy::from_str(&policy_str)
-				.map_err(|_| PaperClientError::InvalidResponse)?;
 
 			let stats = Stats::new(
 				max_size,
@@ -254,6 +262,7 @@ impl Command<'_> {
 
 				miss_ratio,
 
+				policies,
 				policy,
 				is_auto_policy,
 
