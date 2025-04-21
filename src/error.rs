@@ -110,8 +110,8 @@ impl PaperCacheError {
 
 			4 => PaperCacheError::ZeroCacheSize,
 
-			6 => PaperCacheError::UnconfiguredPolicy,
-			7 => PaperCacheError::InvalidPolicy,
+			5 => PaperCacheError::UnconfiguredPolicy,
+			6 => PaperCacheError::InvalidPolicy,
 
 			_ => PaperCacheError::Internal,
 		}
