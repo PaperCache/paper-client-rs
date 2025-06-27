@@ -91,7 +91,7 @@ impl PaperPool {
 	///     Err(err) => println!("{err:?}"),
 	/// };
 	/// ```
-	pub fn client(&self) -> MutexGuard<PaperClient> {
+	pub fn client(&self) -> MutexGuard<'_, PaperClient> {
 		self.clients[self.get_index()]
 			.lock().expect("Could not obtain client.")
 	}
