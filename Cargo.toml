@@ -1,11 +1,18 @@
 [package]
-name = "paper_client"
-version = "1.10.0"
+name = "paper-client"
+version = "1.10.1"
 edition = "2024"
+license = "AGPL-3.0"
+description = "The Rust paper-cache client."
+repository = "https://github.com/PaperCache/paper-client-rs.git"
+readme = "README.md"
+homepage = "https://papercache.io"
+keywords = ["caching", "PaperCache"]
+categories = ["caching"]
 
 [dependencies]
-paper_utils = { git = "ssh://git@github.com/Paper-Book/paper-utils.git", tag = "v1.2.3" }
-kwik = { git = "https://github.com/KiaShakiba/kwik.git", tag = "v1.16.4" }
+paper-utils = "1.2.5"
+kwik = "1.18.6"
 thiserror = "2.0.12"
 
 [dev-dependencies]
