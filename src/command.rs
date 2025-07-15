@@ -21,7 +21,7 @@ use crate::{
 	error::PaperClientError,
 	value::PaperValue,
 	policy::PaperPolicy,
-	stats::Stats,
+	status::Status,
 };
 
 pub enum Command<'a> {
@@ -44,7 +44,7 @@ pub enum Command<'a> {
 	Resize(u64),
 	Policy(PaperPolicy),
 
-	Stats,
+	Status,
 }
 
 impl Command<'_> {
@@ -141,9 +141,9 @@ impl Command<'_> {
 					.into_sheet()
 			},
 
-			Command::Stats => {
+			Command::Status => {
 				SheetBuilder::new()
-					.write_u8(CommandByte::STATS)
+					.write_u8(CommandByte::STATUS)
 					.into_sheet()
 			},
 		};
@@ -224,7 +224,7 @@ impl Command<'_> {
 		}
 	}
 
-	pub fn parse_stats_stream(&self, stream: &mut TcpStream) -> PaperClientResult<Stats> {
+	pub fn parse_status_stream(&self, stream: &mut TcpStream) -> PaperClientResult<Status> {
 		let mut reader = StreamReader::new(stream);
 
 		let is_ok = reader
@@ -232,9 +232,14 @@ impl Command<'_> {
 			.map_err(|_| PaperClientError::InvalidResponse)?;
 
 		if is_ok {
+			let pid = reader.read_u32().map_err(|_| PaperClientError::InvalidResponse)?;
+
 			let max_size = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
 			let used_size = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
 			let num_objects = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
+
+			let rss = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
+			let hwm = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
 
 			let total_gets = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
 			let total_sets = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
@@ -258,10 +263,15 @@ impl Command<'_> {
 
 			let uptime = reader.read_u64().map_err(|_| PaperClientError::InvalidResponse)?;
 
-			let stats = Stats::new(
+			let status = Status::new(
+				pid,
+
 				max_size,
 				used_size,
 				num_objects,
+
+				rss,
+				hwm,
 
 				total_gets,
 				total_sets,
@@ -276,7 +286,7 @@ impl Command<'_> {
 				uptime,
 			);
 
-			Ok(stats)
+			Ok(status)
 		} else {
 			Err(PaperClientError::from_stream(reader))
 		}

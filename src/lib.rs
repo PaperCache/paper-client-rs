@@ -17,8 +17,8 @@ pub use crate::paper_pool::*;
 pub mod policy;
 pub use crate::policy::*;
 
-pub mod stats;
-pub use crate::stats::*;
+pub mod status;
+pub use crate::status::*;
 
 mod value;
 pub use crate::value::*;

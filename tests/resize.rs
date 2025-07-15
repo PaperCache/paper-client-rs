@@ -23,9 +23,9 @@ fn resize() {
 }
 
 fn get_cache_size(client: &mut PaperClient) -> u64 {
-	let stats = client
-		.stats()
-		.expect("Could not get cache size.");
+	let status = client
+		.status()
+		.expect("Could not get cache status.");
 
-	stats.get_max_size()
+	status.max_size()
 }

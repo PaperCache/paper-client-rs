@@ -15,7 +15,7 @@ use crate::{
 	value::PaperValue,
 	command::Command,
 	policy::PaperPolicy,
-	stats::Stats,
+	status::Status,
 };
 
 const RECONNECT_MAX_ATTEMPTS: u8 = 3;
@@ -316,7 +316,7 @@ impl PaperClient {
 		self.process(&command)
 	}
 
-	/// Gets the cache statistics.
+	/// Gets the cache's status.
 	///
 	/// # Examples
 	/// ```
@@ -324,13 +324,13 @@ impl PaperClient {
 	///
 	/// let mut client = PaperClient::new("paper://127.0.0.1:3145").unwrap();
 	///
-	/// match client.stats() {
-	///     Ok(stats) => println!("{stats:?}"),
+	/// match client.status() {
+	///     Ok(status) => println!("{status:?}"),
 	///     Err(err) => println!("{err:?}"),
 	/// }
 	/// ```
-	pub fn stats(&mut self) -> PaperClientResult<Stats> {
-		self.process_stats(&Command::Stats)
+	pub fn status(&mut self) -> PaperClientResult<Status> {
+		self.process_status(&Command::Status)
 	}
 
 	fn process(&mut self, command: &Command<'_>) -> PaperClientResult<()> {
@@ -401,8 +401,8 @@ impl PaperClient {
 		}
 	}
 
-	fn process_stats(&mut self, command: &Command<'_>) -> PaperClientResult<Stats> {
-		match self.send(command).and_then(|_| self.receive_stats(command)) {
+	fn process_status(&mut self, command: &Command<'_>) -> PaperClientResult<Status> {
+		match self.send(command).and_then(|_| self.receive_status(command)) {
 			Ok(response) => {
 				self.reconnect_attempts = 0;
 				Ok(response)
@@ -411,7 +411,7 @@ impl PaperClient {
 			Err(PaperClientError::InvalidResponse) => {
 				self.reconnect_attempts += 1;
 				self.reconnect()?;
-				self.process_stats(command)
+				self.process_status(command)
 			},
 
 			err => err,
@@ -443,8 +443,8 @@ impl PaperClient {
 		command.parse_size_stream(&mut self.stream)
 	}
 
-	fn receive_stats(&mut self, command: &Command<'_>) -> PaperClientResult<Stats> {
-		command.parse_stats_stream(&mut self.stream)
+	fn receive_status(&mut self, command: &Command<'_>) -> PaperClientResult<Status> {
+		command.parse_status_stream(&mut self.stream)
 	}
 
 	fn handshake(&mut self) -> PaperClientResult<()> {

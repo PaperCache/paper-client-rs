@@ -1,9 +1,9 @@
 mod common;
 
 #[test]
-fn stats() {
+fn status() {
 	let mut client = common::init_client(true);
 
-	let result = client.stats();
+	let result = client.status();
 	assert!(result.is_ok());
 }

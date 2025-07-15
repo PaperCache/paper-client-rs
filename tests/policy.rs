@@ -23,9 +23,9 @@ fn policy() {
 }
 
 fn get_cache_policy(client: &mut PaperClient) -> PaperPolicy {
-	let stats = client
-		.stats()
-		.expect("Could not get cache size.");
+	let status = client
+		.status()
+		.expect("Could not get cache status.");
 
-	*stats.get_policy()
+	*status.policy()
 }
