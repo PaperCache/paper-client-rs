@@ -6,9 +6,9 @@
  */
 
 use std::{
-	string::FromUtf8Error,
-	str::{self, Utf8Error},
 	fmt::{self, Formatter},
+	str::{self, Utf8Error},
+	string::FromUtf8Error,
 };
 
 pub struct PaperValue(Box<[u8]>);
@@ -21,9 +21,7 @@ impl From<Box<[u8]>> for PaperValue {
 
 impl From<&[u8]> for PaperValue {
 	fn from(value: &[u8]) -> Self {
-		let buf = value
-			.to_vec()
-			.into_boxed_slice();
+		let buf = value.to_vec().into_boxed_slice();
 
 		PaperValue(buf)
 	}
@@ -37,10 +35,7 @@ impl From<Vec<u8>> for PaperValue {
 
 impl From<&str> for PaperValue {
 	fn from(value: &str) -> Self {
-		let buf = value
-			.as_bytes()
-			.to_vec()
-			.into_boxed_slice();
+		let buf = value.as_bytes().to_vec().into_boxed_slice();
 
 		PaperValue(buf)
 	}

@@ -12,8 +12,7 @@ fn peek_existent() {
 	let result = client.peek("key");
 	assert!(result.is_ok());
 
-	let value: String = result.unwrap()
-		.try_into().unwrap();
+	let value: String = result.unwrap().try_into().unwrap();
 
 	assert_eq!(value, "value");
 }

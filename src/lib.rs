@@ -23,6 +23,6 @@ pub use crate::status::*;
 mod value;
 pub use crate::value::*;
 
-mod arg;
 mod addr;
+mod arg;
 mod command;

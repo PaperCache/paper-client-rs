@@ -68,9 +68,7 @@ impl FromStr for PaperPolicy {
 
 fn parse_two_q(value: &str) -> Result<PaperPolicy, PaperClientError> {
 	// skip the "2q-"
-	let tokens = value[3..]
-		.split('-')
-		.collect::<Vec<&str>>();
+	let tokens = value[3..].split('-').collect::<Vec<&str>>();
 
 	if tokens.len() != 2 {
 		return Err(PaperClientError::Internal);
@@ -89,9 +87,7 @@ fn parse_two_q(value: &str) -> Result<PaperPolicy, PaperClientError> {
 
 fn parse_s_three_fifo(value: &str) -> Result<PaperPolicy, PaperClientError> {
 	// skip the "s3-fifo-"
-	let tokens = value[8..]
-		.split('-')
-		.collect::<Vec<&str>>();
+	let tokens = value[8..].split('-').collect::<Vec<&str>>();
 
 	if tokens.len() != 1 {
 		return Err(PaperClientError::Internal);

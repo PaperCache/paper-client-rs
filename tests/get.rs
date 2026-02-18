@@ -12,8 +12,7 @@ fn get_existent() {
 	let result = client.get("key");
 	assert!(result.is_ok());
 
-	let value: String = result.unwrap()
-		.try_into().unwrap();
+	let value: String = result.unwrap().try_into().unwrap();
 
 	assert_eq!(value, "value");
 }

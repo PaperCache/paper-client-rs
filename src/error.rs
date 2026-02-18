@@ -5,8 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-use thiserror::Error;
 use paper_utils::stream::StreamReader;
+use thiserror::Error;
 
 #[derive(Debug, PartialEq, Error)]
 pub enum PaperClientError {

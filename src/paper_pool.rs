@@ -9,19 +9,15 @@ use std::sync::{
 	Arc,
 	Mutex,
 	MutexGuard,
-	atomic::{Ordering, AtomicUsize},
+	atomic::{AtomicUsize, Ordering},
 };
 
-use crate::{
-	paper_client::PaperClient,
-	error::PaperClientError,
-	addr::FromPaperAddr,
-};
+use crate::{addr::FromPaperAddr, error::PaperClientError, paper_client::PaperClient};
 
 #[derive(Debug, Clone)]
 pub struct PaperPool {
 	clients: Arc<Box<[Arc<Mutex<PaperClient>>]>>,
-	index: Arc<AtomicUsize>,
+	index:   Arc<AtomicUsize>,
 }
 
 impl PaperPool {
@@ -47,7 +43,7 @@ impl PaperPool {
 
 		let pool = PaperPool {
 			clients: Arc::new(clients.into_boxed_slice()),
-			index: Arc::new(AtomicUsize::default()),
+			index:   Arc::new(AtomicUsize::default()),
 		};
 
 		Ok(pool)
@@ -68,7 +64,8 @@ impl PaperPool {
 	pub fn auth(&self, token: &str) -> Result<(), PaperClientError> {
 		for client in self.clients.iter() {
 			client
-				.lock().expect("Could not obtain client.")
+				.lock()
+				.expect("Could not obtain client.")
 				.auth(token)?;
 		}
 
@@ -93,12 +90,14 @@ impl PaperPool {
 	/// ```
 	pub fn client(&self) -> MutexGuard<'_, PaperClient> {
 		self.clients[self.get_index()]
-			.lock().expect("Could not obtain client.")
+			.lock()
+			.expect("Could not obtain client.")
 	}
 
 	fn get_index(&self) -> usize {
 		let index = self.index.load(Ordering::Relaxed);
-		self.index.store((index + 1) % self.clients.len(), Ordering::Relaxed);
+		self.index
+			.store((index + 1) % self.clients.len(), Ordering::Relaxed);
 		index
 	}
 }

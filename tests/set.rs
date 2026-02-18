@@ -1,9 +1,6 @@
 mod common;
 
-use std::{
-	thread,
-	time::Duration,
-};
+use std::{thread, time::Duration};
 
 use serial_test::serial;
 

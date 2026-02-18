@@ -7,8 +7,7 @@ fn version() {
 	let result = client.version();
 	assert!(result.is_ok());
 
-	let value: String = result.unwrap()
-		.try_into().unwrap();
+	let value: String = result.unwrap().try_into().unwrap();
 
 	assert!(!value.is_empty());
 }

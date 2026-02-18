@@ -11,8 +11,8 @@ use crate::policy::PaperPolicy;
 pub struct Status {
 	pid: u32,
 
-	max_size: u64,
-	used_size: u64,
+	max_size:    u64,
+	used_size:   u64,
 	num_objects: u64,
 
 	rss: u64,
@@ -24,8 +24,8 @@ pub struct Status {
 
 	miss_ratio: f64,
 
-	policies: Vec<PaperPolicy>,
-	policy: PaperPolicy,
+	policies:       Vec<PaperPolicy>,
+	policy:         PaperPolicy,
 	is_auto_policy: bool,
 
 	uptime: u64,
@@ -153,7 +153,8 @@ impl Status {
 		&self.policy
 	}
 
-	/// Returns `true` if the cache is configured to the [`PaperPolicy::Auto`] eviction policy.
+	/// Returns `true` if the cache is configured to the [`PaperPolicy::Auto`]
+	/// eviction policy.
 	#[must_use]
 	pub fn is_auto_policy(&self) -> bool {
 		self.is_auto_policy

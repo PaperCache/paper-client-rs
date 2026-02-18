@@ -6,16 +6,17 @@
  */
 
 use std::net::TcpStream;
-pub use paper_utils::stream::{StreamReader, StreamError};
+
+pub use paper_utils::stream::{StreamError, StreamReader};
 
 use crate::{
-	error::PaperClientError,
 	addr::FromPaperAddr,
-	arg::{AsPaperKey, AsPaperAuthToken},
-	value::PaperValue,
+	arg::{AsPaperAuthToken, AsPaperKey},
 	command::Command,
+	error::PaperClientError,
 	policy::PaperPolicy,
 	status::Status,
+	value::PaperValue,
 };
 
 const RECONNECT_MAX_ATTEMPTS: u8 = 3;
@@ -26,7 +27,7 @@ pub type PaperClientResult<T> = Result<T, PaperClientError>;
 pub struct PaperClient {
 	addr: String,
 
-	auth_token: Option<String>,
+	auth_token:         Option<String>,
 	reconnect_attempts: u8,
 
 	stream: TcpStream,
@@ -162,11 +163,7 @@ impl PaperClient {
 			.try_into()
 			.map_err(|_| PaperClientError::InvalidValue)?;
 
-		let command = Command::Set(
-			key.as_paper_key(),
-			value,
-			ttl.unwrap_or(0),
-		);
+		let command = Command::Set(key.as_paper_key(), value, ttl.unwrap_or(0));
 
 		self.process(&command)
 	}
@@ -208,8 +205,8 @@ impl PaperClient {
 		self.process_has(&command)
 	}
 
-	/// Gets (peeks) the value of the supplied key from the cache without altering
-	/// the eviction order of the objects.
+	/// Gets (peeks) the value of the supplied key from the cache without
+	/// altering the eviction order of the objects.
 	///
 	/// # Examples
 	/// ```
@@ -334,7 +331,10 @@ impl PaperClient {
 	}
 
 	fn process(&mut self, command: &Command<'_>) -> PaperClientResult<()> {
-		match self.send(command).and_then(|_| self.receive(command)) {
+		match self
+			.send(command)
+			.and_then(|_| self.receive(command))
+		{
 			Ok(response) => {
 				self.reconnect_attempts = 0;
 				Ok(response)
@@ -351,7 +351,10 @@ impl PaperClient {
 	}
 
 	fn process_with_value(&mut self, command: &Command<'_>) -> PaperClientResult<PaperValue> {
-		match self.send(command).and_then(|_| self.receive_with_value(command)) {
+		match self
+			.send(command)
+			.and_then(|_| self.receive_with_value(command))
+		{
 			Ok(response) => {
 				self.reconnect_attempts = 0;
 				Ok(response)
@@ -368,7 +371,10 @@ impl PaperClient {
 	}
 
 	fn process_has(&mut self, command: &Command<'_>) -> PaperClientResult<bool> {
-		match self.send(command).and_then(|_| self.receive_has(command)) {
+		match self
+			.send(command)
+			.and_then(|_| self.receive_has(command))
+		{
 			Ok(response) => {
 				self.reconnect_attempts = 0;
 				Ok(response)
@@ -385,7 +391,10 @@ impl PaperClient {
 	}
 
 	fn process_size(&mut self, command: &Command<'_>) -> PaperClientResult<u32> {
-		match self.send(command).and_then(|_| self.receive_size(command)) {
+		match self
+			.send(command)
+			.and_then(|_| self.receive_size(command))
+		{
 			Ok(response) => {
 				self.reconnect_attempts = 0;
 				Ok(response)
@@ -402,7 +411,10 @@ impl PaperClient {
 	}
 
 	fn process_status(&mut self, command: &Command<'_>) -> PaperClientResult<Status> {
-		match self.send(command).and_then(|_| self.receive_status(command)) {
+		match self
+			.send(command)
+			.and_then(|_| self.receive_status(command))
+		{
 			Ok(response) => {
 				self.reconnect_attempts = 0;
 				Ok(response)
@@ -477,8 +489,7 @@ impl PaperClient {
 }
 
 fn init_stream(addr: &str) -> PaperClientResult<TcpStream> {
-	let stream = TcpStream::connect(addr)
-		.map_err(|_| PaperClientError::UnreachableServer)?;
+	let stream = TcpStream::connect(addr).map_err(|_| PaperClientError::UnreachableServer)?;
 
 	if stream.set_nodelay(true).is_err() {
 		return Err(PaperClientError::Internal);
