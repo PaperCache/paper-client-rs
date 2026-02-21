@@ -12,7 +12,7 @@ use std::sync::{
 	atomic::{AtomicUsize, Ordering},
 };
 
-use crate::{addr::FromPaperAddr, error::PaperClientError, paper_client::PaperClient};
+use crate::{addr::FromPaperAddr, client::PaperClient, error::PaperClientError};
 
 #[derive(Debug, Clone)]
 pub struct PaperPool {

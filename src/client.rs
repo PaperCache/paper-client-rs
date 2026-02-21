@@ -74,7 +74,7 @@ impl PaperClient {
 	/// }
 	/// ```
 	pub fn ping(&mut self) -> PaperClientResult<PaperValue> {
-		self.process_with_value(&Command::Ping)
+		self.process_value(&Command::Ping)
 	}
 
 	/// Gets the cache version.
@@ -91,7 +91,7 @@ impl PaperClient {
 	/// }
 	/// ```
 	pub fn version(&mut self) -> PaperClientResult<PaperValue> {
-		self.process_with_value(&Command::Version)
+		self.process_value(&Command::Version)
 	}
 
 	/// Attempts to authorize the connection with the supplied auth token. This
@@ -135,7 +135,7 @@ impl PaperClient {
 	/// ```
 	pub fn get(&mut self, key: impl AsPaperKey) -> PaperClientResult<PaperValue> {
 		let command = Command::Get(key.as_paper_key());
-		self.process_with_value(&command)
+		self.process_value(&command)
 	}
 
 	/// Sets the supplied key, value, and ttl to the cache.
@@ -219,7 +219,7 @@ impl PaperClient {
 	/// ```
 	pub fn peek(&mut self, key: impl AsPaperKey) -> PaperClientResult<PaperValue> {
 		let command = Command::Peek(key.as_paper_key());
-		self.process_with_value(&command)
+		self.process_value(&command)
 	}
 
 	/// Sets the TTL associated with the supplied key.
@@ -348,10 +348,10 @@ impl PaperClient {
 		}
 	}
 
-	fn process_with_value(&mut self, command: &Command<'_>) -> PaperClientResult<PaperValue> {
+	fn process_value(&mut self, command: &Command<'_>) -> PaperClientResult<PaperValue> {
 		match self
 			.send(command)
-			.and_then(|_| self.receive_with_value(command))
+			.and_then(|_| self.receive_value(command))
 		{
 			Ok(response) => {
 				self.reconnect_attempts = 0;
@@ -361,7 +361,7 @@ impl PaperClient {
 			Err(PaperClientError::InvalidResponse) => {
 				self.reconnect_attempts += 1;
 				self.reconnect()?;
-				self.process_with_value(command)
+				self.process_value(command)
 			},
 
 			err => err,
@@ -430,7 +430,7 @@ impl PaperClient {
 
 	fn send(&mut self, command: &Command<'_>) -> PaperClientResult<()> {
 		command
-			.to_stream(&mut self.stream)
+			.write(&mut self.stream)
 			.map_err(|err| match err {
 				StreamError::InvalidStream => PaperClientError::Disconnected,
 				_ => PaperClientError::InvalidCommand,
@@ -438,23 +438,23 @@ impl PaperClient {
 	}
 
 	fn receive(&mut self, command: &Command<'_>) -> PaperClientResult<()> {
-		command.parse_stream(&mut self.stream)
+		command.parse_reader(&mut self.stream)
 	}
 
-	fn receive_with_value(&mut self, command: &Command<'_>) -> PaperClientResult<PaperValue> {
-		command.parse_buf_stream(&mut self.stream)
+	fn receive_value(&mut self, command: &Command<'_>) -> PaperClientResult<PaperValue> {
+		command.parse_buf_reader(&mut self.stream)
 	}
 
 	fn receive_has(&mut self, command: &Command<'_>) -> PaperClientResult<bool> {
-		command.parse_has_stream(&mut self.stream)
+		command.parse_has_reader(&mut self.stream)
 	}
 
 	fn receive_size(&mut self, command: &Command<'_>) -> PaperClientResult<u32> {
-		command.parse_size_stream(&mut self.stream)
+		command.parse_size_reader(&mut self.stream)
 	}
 
 	fn receive_status(&mut self, command: &Command<'_>) -> PaperClientResult<Status> {
-		command.parse_status_stream(&mut self.stream)
+		command.parse_status_reader(&mut self.stream)
 	}
 
 	fn handshake(&mut self) -> PaperClientResult<()> {
@@ -466,7 +466,7 @@ impl PaperClient {
 
 		match is_ok {
 			true => Ok(()),
-			false => Err(PaperClientError::from_stream(reader)),
+			false => Err(PaperClientError::from_reader(reader)),
 		}
 	}
 

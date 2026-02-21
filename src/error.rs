@@ -5,13 +5,14 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+use std::io::Read;
+
+#[cfg(feature = "tokio")]
+use paper_utils::stream::AsyncStreamReader;
 use paper_utils::stream::StreamReader;
 use thiserror::Error;
 #[cfg(feature = "tokio")]
-use tokio::{
-	io::{AsyncReadExt, BufStream},
-	net::TcpStream,
-};
+use tokio::io::AsyncRead;
 
 pub type PaperClientResult<T> = Result<T, PaperClientError>;
 
@@ -82,7 +83,10 @@ pub enum PaperServerError {
 }
 
 impl PaperClientError {
-	pub fn from_stream(mut reader: StreamReader) -> Self {
+	pub fn from_reader<R>(mut reader: StreamReader<R>) -> Self
+	where
+		R: Read,
+	{
 		let Ok(code) = reader.read_u8() else {
 			return PaperClientError::InvalidResponse;
 		};
@@ -102,7 +106,10 @@ impl PaperClientError {
 	}
 
 	#[cfg(feature = "tokio")]
-	pub async fn from_async_stream(reader: &mut BufStream<TcpStream>) -> Self {
+	pub async fn from_reader_async<R>(mut reader: AsyncStreamReader<'_, R>) -> Self
+	where
+		R: AsyncRead + Unpin,
+	{
 		let Ok(code) = reader.read_u8().await else {
 			return PaperClientError::InvalidResponse;
 		};

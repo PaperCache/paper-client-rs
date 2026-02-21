@@ -5,19 +5,24 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-pub mod paper_client;
-pub use crate::paper_client::*;
+pub mod client;
+pub use crate::client::*;
 
 #[cfg(feature = "tokio")]
-pub mod async_paper_client;
+pub mod async_client;
 #[cfg(feature = "tokio")]
-pub use crate::async_paper_client::*;
+pub use crate::async_client::*;
 
 pub mod error;
 pub use error::PaperClientError;
 
-pub mod paper_pool;
-pub use crate::paper_pool::*;
+pub mod pool;
+pub use crate::pool::*;
+
+#[cfg(feature = "tokio")]
+pub mod async_pool;
+#[cfg(feature = "tokio")]
+pub use crate::async_pool::*;
 
 pub mod policy;
 pub use crate::policy::*;
