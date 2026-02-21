@@ -14,6 +14,11 @@ categories = ["caching"]
 paper-utils = "1.2.6"
 kwik = "1.18.6"
 thiserror = "2.0.12"
+tokio = { version = "1", features = ["net", "io-util"], optional = true }
+bytes = { version = "1.11.1", optional = true }
 
 [dev-dependencies]
 serial_test = "3.2.0"
+
+[features]
+tokio = ["dep:tokio", "dep:bytes"]

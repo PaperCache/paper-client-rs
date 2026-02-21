@@ -8,6 +8,11 @@
 pub mod paper_client;
 pub use crate::paper_client::*;
 
+#[cfg(feature = "tokio")]
+pub mod async_paper_client;
+#[cfg(feature = "tokio")]
+pub use crate::async_paper_client::*;
+
 pub mod error;
 pub use error::PaperClientError;
 

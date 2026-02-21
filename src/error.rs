@@ -7,6 +7,13 @@
 
 use paper_utils::stream::StreamReader;
 use thiserror::Error;
+#[cfg(feature = "tokio")]
+use tokio::{
+	io::{AsyncReadExt, BufStream},
+	net::TcpStream,
+};
+
+pub type PaperClientResult<T> = Result<T, PaperClientError>;
 
 #[derive(Debug, PartialEq, Error)]
 pub enum PaperClientError {
@@ -91,7 +98,26 @@ impl PaperClientError {
 		}
 
 		let server_error = PaperServerError::from_code(code);
+		PaperClientError::ServerError(server_error)
+	}
 
+	#[cfg(feature = "tokio")]
+	pub async fn from_async_stream(reader: &mut BufStream<TcpStream>) -> Self {
+		let Ok(code) = reader.read_u8().await else {
+			return PaperClientError::InvalidResponse;
+		};
+
+		if code == 0 {
+			let Ok(cache_code) = reader.read_u8().await else {
+				return PaperClientError::InvalidResponse;
+			};
+
+			let cache_error = PaperCacheError::from_code(cache_code);
+
+			return PaperClientError::CacheError(cache_error);
+		}
+
+		let server_error = PaperServerError::from_code(code);
 		PaperClientError::ServerError(server_error)
 	}
 }

@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-use crate::{error::PaperClientError, paper_client::PaperClientResult};
+use crate::error::{PaperClientError, PaperClientResult};
 
 pub trait FromPaperAddr: Clone {
 	fn to_addr(&self) -> PaperClientResult<String>;

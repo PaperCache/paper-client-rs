@@ -13,15 +13,13 @@ use crate::{
 	addr::FromPaperAddr,
 	arg::{AsPaperAuthToken, AsPaperKey},
 	command::Command,
-	error::PaperClientError,
+	error::{PaperClientError, PaperClientResult},
 	policy::PaperPolicy,
 	status::Status,
 	value::PaperValue,
 };
 
 const RECONNECT_MAX_ATTEMPTS: u8 = 3;
-
-pub type PaperClientResult<T> = Result<T, PaperClientError>;
 
 #[derive(Debug)]
 pub struct PaperClient {
